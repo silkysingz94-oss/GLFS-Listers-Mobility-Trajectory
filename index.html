@@ -1,0 +1,1264 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SILKYSINGZ GEOAI | GLFS INTERVIEWER MOVEMENT INTELLIGENCE</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+:root{
+ --green:#17633d;
+ --blue:#246eb4;
+ --dark:#263b4a;
+ --muted:#788791;
+ --line:#e0e6e9;
+}
+*{box-sizing:border-box}
+html,body{
+ height:100%;width:100%;margin:0;overflow:hidden;
+ font-family:Arial,sans-serif;background:#f4f6f7;color:var(--dark)
+}
+#map{position:absolute;inset:0;z-index:1}
+.leaflet-control-attribution{font-size:9px!important}
+.leaflet-control-zoom{display:none!important}
+
+.header{
+ position:absolute;z-index:1000;top:12px;left:15px;
+ background:#ffffffed;border:1px solid #e2e7e9;border-radius:7px;
+ padding:10px 13px;box-shadow:0 2px 12px #26374617;
+ max-width:calc(100vw - 30px);pointer-events:none
+}
+.header-title{font-size:13px;font-weight:800;color:#24475c;letter-spacing:.3px}
+.header-sub{font-size:10px;color:#82909a;margin-top:4px}
+
+.panel{
+ position:absolute;z-index:1200;top:88px;left:14px;width:300px;
+ max-height:calc(100vh - 105px);overflow-y:auto;
+ background:#ffffffed;border:1px solid #e1e6e9;border-radius:8px;
+ box-shadow:0 4px 18px #26374618;padding:13px;backdrop-filter:blur(7px)
+}
+.panel-title{font-size:12px;font-weight:800;color:#344b5c;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.section-title{font-size:10px;font-weight:800;color:var(--green);margin:13px 0 7px;text-transform:uppercase;letter-spacing:.4px}
+label{display:block;font-size:10px;font-weight:700;color:#71808a;margin:9px 0 5px}
+select,input[type="file"]{
+ width:100%;border:1px solid #dce2e6;border-radius:5px;
+ background:#fff;color:#334653;padding:8px;font-size:11px
+}
+input[type="range"]{width:100%;accent-color:var(--blue)}
+button{
+ border:1px solid #dce2e6;background:#f7f9fa;color:#405565;
+ border-radius:5px;padding:8px 9px;cursor:pointer;font-size:10px;font-weight:700
+}
+button:hover{background:#edf3f7}
+button.primary{background:#1769bd;color:white;border-color:#1769bd}
+button.primary:hover{background:#12589e}
+.button-row{display:flex;gap:6px;margin-top:8px}
+.button-row button{flex:1}
+.check{display:flex;align-items:center;gap:7px;font-size:10px;color:#64737d;margin:8px 0}
+.check input{margin:0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.stat{background:#f5f8fa;border:1px solid #e8edf0;border-radius:5px;padding:8px}
+.stat small{display:block;color:#8a969e;font-size:9px;margin-bottom:4px}
+.stat strong{color:#34536b;font-size:16px;overflow-wrap:anywhere}
+.legend{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.legend-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:10px;color:#64737d}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.line-symbol{width:20px;height:3px;background:#548fc5}
+#status{font-size:10px;line-height:1.5;color:#687984;margin-top:10px;overflow-wrap:anywhere}
+.note{font-size:9px;line-height:1.5;color:#87939b;margin-top:9px}
+.file-status{font-size:9px;line-height:1.4;color:#71808a;margin-top:5px;overflow-wrap:anywhere}
+.badge{display:inline-block;background:#edf4f8;color:#42647c;padding:3px 6px;border-radius:4px;font-size:9px;margin-top:5px}
+
+.point-icon{
+ width:23px;height:23px;border-radius:50%;
+ border:2px solid white;box-shadow:0 1px 5px #0005;
+ color:white;text-align:center;line-height:19px;
+ font-size:9px;font-weight:800
+}
+.point-label{
+ background:#ffffffed;border:1px solid #dce3e8;border-radius:3px;
+ padding:2px 4px;color:#354d5e;font-size:9px;font-weight:700;
+ white-space:nowrap;box-shadow:0 1px 3px #0002
+}
+.selected-point{
+ width:27px;height:27px;border:3px solid white;border-radius:50%;
+ box-shadow:0 0 0 3px #e45b45,0 2px 7px #0005;
+ color:white;text-align:center;line-height:21px;font-weight:800;font-size:10px
+}
+#mapLegend{
+ position:absolute;z-index:1000;right:15px;top:15px;
+ background:#ffffffed;border:1px solid #e2e7e9;border-radius:6px;
+ padding:10px 12px;max-width:190px;box-shadow:0 2px 10px #26374615
+}
+#mapLegend strong{font-size:10px;color:#405665}
+#mapLegend div{font-size:9px;color:#687984;margin-top:6px;display:flex;gap:7px;align-items:center}
+.legend-swatch{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.scale-wrap{
+ position:absolute;z-index:1000;right:25px;bottom:28px;
+ color:#737d84;text-align:center;font:12px monospace;pointer-events:none
+}
+.scale-line{height:8px;width:150px;border-left:2px solid #7e878d;border-right:2px solid #7e878d;border-bottom:2px solid #7e878d}
+.footer{
+ position:absolute;z-index:1000;left:325px;bottom:10px;
+ color:#84919a;font-size:9px;pointer-events:none
+}
+.popup{font-size:11px;line-height:1.6}
+.popup strong{color:#1769bd}
+@media(max-width:600px){
+ .panel{top:78px;width:255px;max-height:calc(100vh - 90px)}
+ #mapLegend{top:auto;bottom:42px;right:10px;max-width:145px}
+ .footer{display:none}
+}
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+
+<div class="header">
+ <div class="header-title">SILKYSINGZ GEOAI | GLFS INTERVIEWER MOVEMENT INTELLIGENCE</div>
+ <div class="header-sub">The Gambia · GLFS Phase 1 · Interview Locations and Chronological Sequences</div>
+</div>
+
+<div id="mapLegend">
+ <strong>FIELDWORK MAP LEGEND</strong>
+ <div><span class="legend-swatch" style="background:#2476c5"></span> Interview location</div>
+ <div><span class="legend-swatch" style="background:#e45b42"></span> Selected interview point</div>
+ <div><span style="width:18px;height:3px;background:#548fc5;display:inline-block"></span> Interview sequence</div>
+ <div><span class="legend-swatch" style="background:#d9a33c"></span> EA boundary</div>
+</div>
+
+<div class="panel">
+ <div class="panel-title">GLFS FIELDWORK MOBILITY DASHBOARD</div>
+
+ <div class="section-title">01 · Data sources</div>
+
+ <label>GLFS interview CSV</label>
+ <input type="file" id="csvFile" accept=".csv,text/csv">
+ <div class="file-status" id="csvStatus">Attempting automatic CSV loading...</div>
+
+ <label>Enumeration Area GeoJSON / JSON</label>
+ <input type="file" id="geoFile" accept=".json,.geojson,application/json">
+ <div class="file-status" id="geoStatus">Attempting automatic EA boundary loading...</div>
+
+ <div class="button-row">
+  <button class="primary" id="reloadData">Reload data</button>
+  <button id="resetFilters">Reset filters</button>
+ </div>
+
+ <div class="section-title">02 · Basemap</div>
+ <label>Map background</label>
+ <select id="basemap">
+  <option value="light">Light map</option>
+  <option value="street">Street map</option>
+  <option value="satellite">Satellite imagery</option>
+  <option value="hybrid">Hybrid imagery + labels</option>
+  <option value="terrain">Terrain</option>
+  <option value="dark">Dark map</option>
+ </select>
+
+ <div class="section-title">03 · Interviewer selection</div>
+ <label>Select your code/name</label>
+ <select id="interviewer"><option value="">All interviewers</option></select>
+
+ <label>Select your supervisor</label>
+ <select id="supervisor"><option value="">All supervisors</option></select>
+
+ <label>Team Number</label>
+ <select id="team"><option value="">All teams</option></select>
+
+ <div class="section-title">04 · Interview date</div>
+ <label>Date of Interview</label>
+ <select id="studyDate"><option value="">All dates</option></select>
+
+ <div class="section-title">05 · Administrative filters</div>
+ <label>LGA</label>
+ <select id="lga"><option value="">All LGAs</option></select>
+
+ <label>District</label>
+ <select id="district"><option value="">All districts</option></select>
+
+ <label>Ward</label>
+ <select id="ward"><option value="">All wards</option></select>
+
+ <label>Settlement</label>
+ <select id="settlement"><option value="">All settlements</option></select>
+
+ <label>Enumeration Area Code</label>
+ <select id="ea"><option value="">All EAs</option></select>
+
+ <div class="section-title">06 · Map display</div>
+ <label>Movement display</label>
+ <select id="movementMode">
+  <option value="selected">Selected interviewer only</option>
+  <option value="all">All interviewers</option>
+  <option value="points">Interview points only</option>
+ </select>
+
+ <div class="check"><input type="checkbox" id="showRoutes" checked><span>Show chronological movement lines</span></div>
+ <div class="check"><input type="checkbox" id="showPoints" checked><span>Show interview points</span></div>
+ <div class="check"><input type="checkbox" id="showLabels" checked><span>Show point numbers and interviewer labels</span></div>
+ <div class="check"><input type="checkbox" id="showBoundaries" checked><span>Show selected EA boundaries</span></div>
+ <div class="check"><input type="checkbox" id="showAllEAs"><span>Show all EA boundaries</span></div>
+
+ <label>Interview point size</label>
+ <input type="range" id="pointSize" min="3" max="10" value="5">
+
+ <div class="button-row">
+  <button class="primary" id="displayBtn">Update map</button>
+  <button id="fitBtn">Zoom to data</button>
+ </div>
+
+ <div class="section-title">07 · Fieldwork statistics</div>
+ <div class="stats">
+  <div class="stat"><small>Interview records</small><strong id="totalInterviews">0</strong></div>
+  <div class="stat"><small>Interviewers</small><strong id="totalPeople">0</strong></div>
+  <div class="stat"><small>Teams</small><strong id="totalTeams">0</strong></div>
+  <div class="stat"><small>Settlements</small><strong id="totalSettlements">0</strong></div>
+  <div class="stat"><small>Sequence distance*</small><strong id="totalDistance">0 km</strong></div>
+  <div class="stat"><small>EA features</small><strong id="totalEAs">0</strong></div>
+ </div>
+
+ <div class="section-title">08 · Export</div>
+ <div class="button-row">
+  <button id="exportCSV">Export filtered CSV</button>
+  <button id="exportGeoJSON">Export points GeoJSON</button>
+ </div>
+
+ <div id="status">Waiting for GLFS data.</div>
+
+ <div class="note">
+  *Sequence distance is straight-line distance between consecutive interview coordinates for the same interviewer on the same date. It is not road distance or a recorded GPS trajectory. Locations are based on CSV x/y coordinates.
+ </div>
+ <div class="note">
+  GBoS GEOAI • Research and educational use
+ </div>
+</div>
+
+<div class="footer">
+ Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics
+</div>
+
+<div class="scale-wrap">
+ <div id="scaleLabel">1 km</div>
+ <div class="scale-line" id="scaleLine"></div>
+</div>
+
+<script>
+/* ==========================================================
+   CONFIGURATION
+========================================================== */
+
+const CSV_URL="GLFS_27ph1_071126_EXCEL.csv";
+
+const GEOJSON_URL=
+"https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/Census_EAs_Geo.json";
+
+const $=id=>document.getElementById(id);
+
+let allRecords=[];
+let eaFeatures=[];
+let csvLoaded=false;
+let geoLoaded=false;
+let selectedRecord=null;
+
+/* ==========================================================
+   MAP AND BASEMAPS
+========================================================== */
+
+const map=L.map("map",{
+ zoomControl:false,
+ preferCanvas:true
+}).setView([13.454,-16.675],8);
+
+const baseLayers={};
+
+baseLayers.light=L.tileLayer(
+ "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+ {maxZoom:20,attribution:"© OpenStreetMap © CARTO"}
+);
+
+baseLayers.street=L.tileLayer(
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+ {maxZoom:20,attribution:"© OpenStreetMap contributors"}
+);
+
+baseLayers.satellite=L.tileLayer(
+ "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+ {maxZoom:19,attribution:"Tiles © Esri"}
+);
+
+baseLayers.hybrid=L.layerGroup([
+ L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19}
+ ),
+ L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+  {maxZoom:20,opacity:.9}
+ )
+]);
+
+baseLayers.terrain=L.tileLayer(
+ "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+ {maxZoom:17,attribution:"© OpenTopoMap contributors"}
+);
+
+baseLayers.dark=L.tileLayer(
+ "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+ {maxZoom:20}
+);
+
+baseLayers.light.addTo(map);
+
+$("basemap").addEventListener("change",()=>{
+ const selected=$("basemap").value;
+
+ Object.values(baseLayers).forEach(layer=>{
+  if(map.hasLayer(layer))map.removeLayer(layer);
+ });
+
+ baseLayers[selected].addTo(map);
+});
+
+/* Keep boundaries below movement lines and points */
+const boundaryLayer=L.layerGroup().addTo(map);
+const routeLayer=L.layerGroup().addTo(map);
+const pointLayer=L.layerGroup().addTo(map);
+
+/* ==========================================================
+   GENERAL HELPERS
+========================================================== */
+
+function clean(value){
+ return String(value??"").replace(/^\uFEFF/,"").trim();
+}
+
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,char=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#039;"
+ }[char]));
+}
+
+function setStatus(message){
+ $("status").textContent=message;
+}
+
+function unique(values){
+ return [...new Set(values.map(clean).filter(Boolean))]
+ .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+}
+
+function normaliseHeaders(row){
+ const output={};
+ Object.keys(row).forEach(key=>{
+  const normal=clean(key).toLowerCase();
+  output[normal]=row[key];
+ });
+ return output;
+}
+
+function getValue(row,names){
+ const normal=normaliseHeaders(row);
+
+ for(const name of names){
+  const key=name.toLowerCase();
+  if(normal[key]!==undefined&&clean(normal[key])!==""){
+   return normal[key];
+  }
+ }
+ return "";
+}
+
+function normaliseDate(value){
+ const s=clean(value);
+ if(!s)return "";
+
+ if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+  return s.substring(0,10);
+ }
+
+ const d=new Date(s);
+ if(!isNaN(d)){
+  return d.getFullYear()+"-"+
+   String(d.getMonth()+1).padStart(2,"0")+"-"+
+   String(d.getDate()).padStart(2,"0");
+ }
+
+ return s;
+}
+
+/* ==========================================================
+   CSV FIELD NORMALISATION
+========================================================== */
+
+function normaliseRecord(row,index){
+ const longitude=Number(clean(getValue(row,[
+  "x","longitude","lon","lng"
+ ])).replace(/,/g,""));
+
+ const latitude=Number(clean(getValue(row,[
+  "y","latitude","lat"
+ ])).replace(/,/g,""));
+
+ if(!Number.isFinite(longitude)||!Number.isFinite(latitude))return null;
+
+ if(longitude < -180||longitude > 180||
+    latitude < -90||latitude > 90)return null;
+
+ return {
+  raw:row,
+  rowIndex:index,
+
+  objectId:getValue(row,["ObjectID","OBJECTID","objectid"])||index+1,
+  globalId:getValue(row,["GlobalID","globalid"]),
+
+  supervisor:clean(getValue(row,[
+   "Select your supervisor","Name of Supervisor","supervisor"
+  ])),
+
+  interviewer:clean(getValue(row,[
+   "Select your code/name","adsn","Creator","enumerator"
+  ])),
+
+  team:clean(getValue(row,["Team Number","team_number","Team"])),
+
+  date:normaliseDate(getValue(row,[
+   "Date of Interview","date_of_interview","interview_date"
+  ])),
+
+  startTime:clean(getValue(row,["interview_starttime"])),
+  endTime:clean(getValue(row,["interview_endtime"])),
+
+  ea:clean(getValue(row,[
+   "Enumeration Area Code","feacode","FEACODE"
+  ])),
+
+  lga:clean(getValue(row,["LGA_cal","LGA","lganame"])),
+  district:clean(getValue(row,["Dist_cal","District","distname"])),
+  ward:clean(getValue(row,["Ward_cal","Ward","wardname"])),
+  settlement:clean(getValue(row,[
+   "Settlement_cal","Settlement","settlement"
+  ])),
+
+  longitude,
+  latitude
+ };
+}
+
+/* ==========================================================
+   DATE AND TIME SORTING
+========================================================== */
+
+function timeToMinutes(value){
+ const match=clean(value).match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+ if(!match)return 99999;
+
+ let hour=Number(match[1]);
+ const minute=Number(match[2]);
+
+ if(hour>23||minute>59)return 99999;
+ return hour*60+minute;
+}
+
+function chronologicalSort(a,b){
+ if(a.date!==b.date)return a.date.localeCompare(b.date);
+
+ const timeDifference=
+  timeToMinutes(a.startTime)-timeToMinutes(b.startTime);
+
+ if(timeDifference!==0)return timeDifference;
+
+ return Number(a.objectId)-Number(b.objectId);
+}
+
+/* ==========================================================
+   LOAD AND PROCESS CSV
+========================================================== */
+
+function parseCSV(text,source){
+ const parsed=Papa.parse(text,{
+  header:true,
+  skipEmptyLines:true,
+  dynamicTyping:false,
+  transformHeader:header=>clean(header)
+ });
+
+ if(!parsed.meta.fields||!parsed.meta.fields.length){
+  throw new Error("No CSV header row found.");
+ }
+
+ const headers=parsed.meta.fields.map(h=>clean(h).toLowerCase());
+
+ if(!headers.includes("x")||!headers.includes("y")){
+  throw new Error("CSV is missing x and/or y coordinate columns.");
+ }
+
+ allRecords=parsed.data
+  .map((row,index)=>normaliseRecord(row,index))
+  .filter(Boolean);
+
+ if(!allRecords.length){
+  throw new Error("No valid coordinates found. Confirm x and y contain decimal-degree longitude and latitude.");
+ }
+
+ csvLoaded=true;
+
+ populateFilters();
+ renderAll();
+
+ $("csvStatus").textContent=
+  "Loaded "+source+" · "+
+  allRecords.length.toLocaleString()+" valid locations.";
+
+ checkReady();
+}
+
+async function loadCSVFromURL(){
+ $("csvStatus").textContent="Attempting automatic CSV loading...";
+
+ try{
+  const response=await fetch(CSV_URL,{cache:"no-store"});
+  if(!response.ok)throw new Error("HTTP "+response.status);
+
+  const text=await response.text();
+  parseCSV(text,CSV_URL);
+ }catch(error){
+  $("csvStatus").textContent=
+   "Automatic loading unavailable. Select GLFS_27ph1_071126_EXCEL.csv below.";
+ }
+}
+
+$("csvFile").addEventListener("change",async event=>{
+ const file=event.target.files[0];
+ if(!file)return;
+
+ $("csvStatus").textContent="Reading "+file.name+"...";
+
+ try{
+  parseCSV(await file.text(),file.name);
+ }catch(error){
+  $("csvStatus").textContent="CSV error: "+error.message;
+  setStatus(error.message);
+ }
+});
+
+/* ==========================================================
+   LOAD CENSUS EA GEOJSON
+========================================================== */
+
+function processGeoJSON(json,source){
+ if(json.type==="FeatureCollection"&&Array.isArray(json.features)){
+  eaFeatures=json.features;
+ }else if(json.type==="Feature"){
+  eaFeatures=[json];
+ }else{
+  throw new Error("Expected a GeoJSON FeatureCollection or Feature.");
+ }
+
+ eaFeatures=eaFeatures.filter(f=>f&&f.geometry);
+
+ if(!eaFeatures.length){
+  throw new Error("No valid EA geometries were found.");
+ }
+
+ geoLoaded=true;
+
+ $("geoStatus").textContent=
+  source+" · "+eaFeatures.length.toLocaleString()+" EA features loaded.";
+
+ renderBoundaries();
+ checkReady();
+}
+
+async function loadGeoJSONFromURL(){
+ $("geoStatus").textContent="Loading Census_EAs_Geo.json...";
+
+ try{
+  const response=await fetch(GEOJSON_URL,{cache:"no-store"});
+  if(!response.ok)throw new Error("HTTP "+response.status);
+
+  const json=await response.json();
+  processGeoJSON(json,"GitHub Census_EAs_Geo.json");
+ }catch(error){
+  $("geoStatus").textContent=
+   "Automatic loading unavailable. Upload Census_EAs_Geo.json below.";
+ }
+}
+
+$("geoFile").addEventListener("change",async event=>{
+ const file=event.target.files[0];
+ if(!file)return;
+
+ $("geoStatus").textContent="Reading "+file.name+"...";
+
+ try{
+  const json=JSON.parse(await file.text());
+  processGeoJSON(json,file.name);
+ }catch(error){
+  $("geoStatus").textContent="JSON error: "+error.message;
+  setStatus(error.message);
+ }
+});
+
+/* ==========================================================
+   FILTER DROPDOWNS
+========================================================== */
+
+function fillSelect(id,values,placeholder){
+ const element=$(id);
+ const previous=element.value;
+
+ element.innerHTML="";
+
+ const all=document.createElement("option");
+ all.value="";
+ all.textContent=placeholder;
+ element.appendChild(all);
+
+ unique(values).forEach(value=>{
+  const option=document.createElement("option");
+  option.value=value;
+  option.textContent=value;
+  element.appendChild(option);
+ });
+
+ if(unique(values).includes(previous)){
+  element.value=previous;
+ }
+}
+
+function populateFilters(){
+ fillSelect("interviewer",allRecords.map(r=>r.interviewer),"All interviewers");
+ fillSelect("supervisor",allRecords.map(r=>r.supervisor),"All supervisors");
+ fillSelect("team",allRecords.map(r=>r.team),"All teams");
+ fillSelect("studyDate",allRecords.map(r=>r.date),"All dates");
+ fillSelect("lga",allRecords.map(r=>r.lga),"All LGAs");
+ fillSelect("district",allRecords.map(r=>r.district),"All districts");
+ fillSelect("ward",allRecords.map(r=>r.ward),"All wards");
+ fillSelect("settlement",allRecords.map(r=>r.settlement),"All settlements");
+ fillSelect("ea",allRecords.map(r=>r.ea),"All EAs");
+}
+
+/* ==========================================================
+   FILTER DATA
+========================================================== */
+
+function getFilteredRecords(){
+ const f={
+  interviewer:$("interviewer").value,
+  supervisor:$("supervisor").value,
+  team:$("team").value,
+  date:$("studyDate").value,
+  lga:$("lga").value,
+  district:$("district").value,
+  ward:$("ward").value,
+  settlement:$("settlement").value,
+  ea:$("ea").value
+ };
+
+ return allRecords.filter(r=>
+  (!f.interviewer||r.interviewer===f.interviewer)&&
+  (!f.supervisor||r.supervisor===f.supervisor)&&
+  (!f.team||r.team===f.team)&&
+  (!f.date||r.date===f.date)&&
+  (!f.lga||r.lga===f.lga)&&
+  (!f.district||r.district===f.district)&&
+  (!f.ward||r.ward===f.ward)&&
+  (!f.settlement||r.settlement===f.settlement)&&
+  (!f.ea||r.ea===f.ea)
+ );
+}
+
+[
+ "interviewer","supervisor","team","studyDate",
+ "lga","district","ward","settlement","ea"
+].forEach(id=>{
+ $(id).addEventListener("change",()=>{
+  selectedRecord=null;
+  renderAll();
+ });
+});
+
+/* ==========================================================
+   INTERVIEWER COLOURS AND GROUPING
+========================================================== */
+
+function colourFor(key){
+ let hash=0;
+
+ for(let i=0;i<key.length;i++){
+  hash=((hash<<5)-hash)+key.charCodeAt(i);
+  hash|=0;
+ }
+
+ const palette=[
+  "#2676bd","#df7255","#397da4","#d69a35",
+  "#5b6da9","#39a18d","#a45c87","#698f49",
+  "#d15c63","#5483c2","#b77b42","#687a90",
+  "#7a63aa","#278c9c","#c46b31","#526f45"
+ ];
+
+ return palette[Math.abs(hash)%palette.length];
+}
+
+/*
+  Separate routes by interviewer AND date.
+  This avoids connecting different interview days.
+*/
+function groupRecords(data){
+ const groups={};
+
+ data.forEach(record=>{
+  const person=record.interviewer||"Unknown interviewer";
+  const date=record.date||"Unknown date";
+  const key=person+"|||"+date;
+
+  if(!groups[key]){
+   groups[key]={
+    interviewer:person,
+    date,
+    records:[]
+   };
+  }
+
+  groups[key].records.push(record);
+ });
+
+ Object.values(groups).forEach(group=>{
+  group.records.sort(chronologicalSort);
+ });
+
+ return groups;
+}
+
+/* ==========================================================
+   DISTANCE CALCULATION
+========================================================== */
+
+function distanceKm(a,b){
+ const R=6371;
+ const rad=v=>v*Math.PI/180;
+
+ const dLat=rad(b.latitude-a.latitude);
+ const dLon=rad(b.longitude-a.longitude);
+
+ const h=Math.sin(dLat/2)**2+
+  Math.cos(rad(a.latitude))*Math.cos(rad(b.latitude))*
+  Math.sin(dLon/2)**2;
+
+ return 2*R*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
+
+/* ==========================================================
+   INTERVIEWER TRACKS AND POINTS
+========================================================== */
+
+function renderMovement(){
+ routeLayer.clearLayers();
+ pointLayer.clearLayers();
+
+ const filtered=getFilteredRecords();
+ const grouped=groupRecords(filtered);
+ const mode=$("movementMode").value;
+
+ let totalDistance=0;
+ let visibleCount=0;
+
+ Object.values(grouped).forEach(group=>{
+  const interviewer=group.interviewer;
+  const date=group.date;
+  const items=group.records;
+  const colour=colourFor(interviewer);
+
+  /*
+   If a particular interviewer has been selected,
+   the filter already restricts the records to that person.
+   If none is selected, display all interviewers.
+  */
+
+  if($("showRoutes").checked&&mode!=="points"&&items.length>1){
+   const latlngs=items.map(r=>[r.latitude,r.longitude]);
+
+   L.polyline(latlngs,{
+    color:colour,
+    weight:2.5,
+    opacity:.72,
+    lineCap:"round",
+    lineJoin:"round"
+   }).addTo(routeLayer);
+
+   for(let i=1;i<items.length;i++){
+    totalDistance+=distanceKm(items[i-1],items[i]);
+   }
+
+   /*
+    Small numbered sequence markers along the route.
+    These indicate sequence direction, not actual GPS tracking.
+   */
+   latlngs.forEach((point,index)=>{
+    if(index===0||index===latlngs.length-1||
+       index%3===0){
+     L.circleMarker(point,{
+      radius:3,
+      color:"#ffffff",
+      weight:1,
+      fillColor:colour,
+      fillOpacity:1,
+      interactive:false
+     }).addTo(routeLayer);
+    }
+   });
+  }
+
+  if(!$("showPoints").checked)return;
+
+  items.forEach((r,index)=>{
+   visibleCount++;
+
+   const isSelected=selectedRecord&&
+    selectedRecord.rowIndex===r.rowIndex;
+
+   const size=Number($("pointSize").value);
+
+   const markerHtml=isSelected?
+    `<div class="selected-point" style="background:${colour}">${index+1}</div>`:
+    `<div class="point-icon" style="background:${colour};width:${size*2+13}px;height:${size*2+13}px;line-height:${size*2+9}px">${index+1}</div>`;
+
+   const icon=L.divIcon({
+    className:"",
+    html:markerHtml,
+    iconSize:[28,28],
+    iconAnchor:[14,14]
+   });
+
+   const marker=L.marker([r.latitude,r.longitude],{
+    icon,
+    title:interviewer+" · "+date+" · Interview "+(index+1)
+   });
+
+   const popup=`
+    <div class="popup">
+     <strong>GLFS INTERVIEW LOCATION</strong><br>
+     Interview sequence: ${index+1} of ${items.length}<br>
+     Interviewer: ${escapeHTML(r.interviewer)}<br>
+     Supervisor: ${escapeHTML(r.supervisor)}<br>
+     Team Number: ${escapeHTML(r.team)}<br>
+     Interview date: ${escapeHTML(r.date)}<br>
+     Start time: ${escapeHTML(r.startTime)}<br>
+     End time: ${escapeHTML(r.endTime)}<br>
+     EA Code: ${escapeHTML(r.ea)}<br>
+     LGA: ${escapeHTML(r.lga)}<br>
+     District: ${escapeHTML(r.district)}<br>
+     Ward: ${escapeHTML(r.ward)}<br>
+     Settlement: ${escapeHTML(r.settlement)}<br>
+     Longitude: ${r.longitude.toFixed(6)}<br>
+     Latitude: ${r.latitude.toFixed(6)}<br>
+     Interview day sequence: ${index+1}
+    </div>`;
+
+   marker.bindPopup(popup);
+
+   if($("showLabels").checked){
+    marker.bindTooltip(
+     `${index+1}. ${escapeHTML(interviewer)}`,
+     {
+      permanent:true,
+      direction:"right",
+      offset:[8,0],
+      className:"point-label"
+     }
+    );
+   }
+
+   marker.on("click",()=>{
+    selectedRecord=r;
+    renderMovement();
+    renderStatistics();
+
+    setStatus(
+     "Selected interview "+(index+1)+
+     " · "+interviewer+
+     " · "+date+
+     " · "+r.startTime
+    );
+   });
+
+   marker.addTo(pointLayer);
+  });
+ });
+
+ $("totalInterviews").textContent=visibleCount.toLocaleString();
+ $("totalDistance").textContent=totalDistance.toFixed(2)+" km";
+}
+
+/* ==========================================================
+   EA BOUNDARIES
+========================================================== */
+
+function featureProperty(feature,names){
+ const p=feature.properties||{};
+
+ for(const name of names){
+  const found=Object.keys(p).find(
+   k=>k.toLowerCase()===name.toLowerCase()
+  );
+
+  if(found!==undefined&&clean(p[found])!==""){
+   return clean(p[found]);
+  }
+ }
+
+ return "";
+}
+
+function featureEA(feature){
+ return featureProperty(feature,[
+  "feacode","FEACODE","eacode","EA_CODE","eaname"
+ ]);
+}
+
+function renderBoundaries(){
+ boundaryLayer.clearLayers();
+
+ if(!geoLoaded){
+  $("totalEAs").textContent="0";
+  return;
+ }
+
+ if(!$("showBoundaries").checked&&!$("showAllEAs").checked){
+  $("totalEAs").textContent="0";
+  return;
+ }
+
+ let features=[];
+
+ if($("showAllEAs").checked){
+  features=eaFeatures;
+ }else{
+  const filtered=getFilteredRecords();
+  const selectedCodes=new Set(
+   filtered.map(r=>r.ea).filter(Boolean)
+  );
+
+  features=eaFeatures.filter(feature=>{
+   const code=featureEA(feature);
+   return code&&selectedCodes.has(code);
+  });
+ }
+
+ if(!features.length){
+  $("totalEAs").textContent="0";
+  return;
+ }
+
+ L.geoJSON(
+  {type:"FeatureCollection",features},
+  {
+   style:{
+    color:"#d9a33c",
+    weight:1.2,
+    opacity:.9,
+    fillColor:"#e5bb68",
+    fillOpacity:.035
+   },
+   onEachFeature:(feature,layer)=>{
+    layer.bindPopup(`
+     <div class="popup">
+      <strong>ENUMERATION AREA</strong><br>
+      EA Code: ${escapeHTML(featureEA(feature))}<br>
+      Region: ${escapeHTML(featureProperty(feature,["RCO"]))}<br>
+      LGA: ${escapeHTML(featureProperty(feature,["lganame","LGA"]))}<br>
+      District: ${escapeHTML(featureProperty(feature,["distname","District"]))}<br>
+      Ward: ${escapeHTML(featureProperty(feature,["wardname","Ward"]))}<br>
+      EA Name: ${escapeHTML(featureProperty(feature,["eaname"]))}
+     </div>
+    `);
+   }
+  }
+ ).addTo(boundaryLayer);
+
+ $("totalEAs").textContent=features.length.toLocaleString();
+}
+
+/* ==========================================================
+   STATISTICS
+========================================================== */
+
+function renderStatistics(){
+ const data=getFilteredRecords();
+
+ $("totalPeople").textContent=
+  unique(data.map(r=>r.interviewer)).length.toLocaleString();
+
+ $("totalTeams").textContent=
+  unique(data.map(r=>r.team)).length.toLocaleString();
+
+ $("totalSettlements").textContent=
+  unique(data.map(r=>r.settlement)).length.toLocaleString();
+}
+
+function renderAll(){
+ renderMovement();
+ renderBoundaries();
+ renderStatistics();
+
+ const data=getFilteredRecords();
+
+ if(!csvLoaded){
+  setStatus("Load the GLFS interview CSV to display locations.");
+  return;
+ }
+
+ setStatus(
+  data.length.toLocaleString()+
+  " filtered interview records displayed. "+
+  (geoLoaded?
+   eaFeatures.length.toLocaleString()+" EA features loaded.":
+   "Upload Census_EAs_Geo.json to display EA boundaries.")
+ );
+}
+
+/* ==========================================================
+   MAP ZOOM
+========================================================== */
+
+function fitData(){
+ const data=getFilteredRecords();
+
+ if(!data.length){
+  setStatus("No matching interview coordinates to zoom to.");
+  return;
+ }
+
+ const bounds=L.latLngBounds(
+  data.map(r=>[r.latitude,r.longitude])
+ );
+
+ if(bounds.isValid()){
+  map.fitBounds(bounds,{padding:[55,55],maxZoom:17});
+ }
+}
+
+$("fitBtn").addEventListener("click",fitData);
+
+$("displayBtn").addEventListener("click",()=>{
+ selectedRecord=null;
+ renderAll();
+ fitData();
+});
+
+/* ==========================================================
+   DISPLAY CONTROLS
+========================================================== */
+
+[
+ "movementMode","showRoutes","showPoints","showLabels","pointSize"
+].forEach(id=>{
+ $(id).addEventListener("change",renderAll);
+ $(id).addEventListener("input",()=>{
+  if(id==="pointSize")renderAll();
+ });
+});
+
+$("showBoundaries").addEventListener("change",renderBoundaries);
+$("showAllEAs").addEventListener("change",renderBoundaries);
+
+/* ==========================================================
+   RESET FILTERS
+========================================================== */
+
+$("resetFilters").addEventListener("click",()=>{
+ [
+  "interviewer","supervisor","team","studyDate",
+  "lga","district","ward","settlement","ea"
+ ].forEach(id=>$(id).value="");
+
+ selectedRecord=null;
+
+ renderAll();
+ fitData();
+});
+
+/* ==========================================================
+   DOWNLOAD HELPER
+========================================================== */
+
+function download(filename,content,type){
+ const blob=new Blob([content],{type});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+
+ a.href=url;
+ a.download=filename;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/* ==========================================================
+   EXPORT FILTERED CSV
+========================================================== */
+
+$("exportCSV").addEventListener("click",()=>{
+ const data=getFilteredRecords();
+
+ if(!data.length){
+  setStatus("No filtered records available for export.");
+  return;
+ }
+
+ download(
+  "GLFS_Filtered_Interview_Records.csv",
+  Papa.unparse(data.map(r=>r.raw)),
+  "text/csv;charset=utf-8;"
+ );
+});
+
+/* ==========================================================
+   EXPORT POINTS GEOJSON
+========================================================== */
+
+$("exportGeoJSON").addEventListener("click",()=>{
+ const data=getFilteredRecords();
+
+ if(!data.length){
+  setStatus("No filtered records available for export.");
+  return;
+ }
+
+ const geojson={
+  type:"FeatureCollection",
+  features:data.map(r=>({
+   type:"Feature",
+   geometry:{
+    type:"Point",
+    coordinates:[r.longitude,r.latitude]
+   },
+   properties:{
+    ObjectID:r.objectId,
+    GlobalID:r.globalId,
+    Interviewer:r.interviewer,
+    Supervisor:r.supervisor,
+    Team_Number:r.team,
+    Interview_Date:r.date,
+    Interview_Start_Time:r.startTime,
+    Interview_End_Time:r.endTime,
+    Enumeration_Area_Code:r.ea,
+    LGA:r.lga,
+    District:r.district,
+    Ward:r.ward,
+    Settlement:r.settlement
+   }
+  }))
+ };
+
+ download(
+  "GLFS_Interview_Locations.geojson",
+  JSON.stringify(geojson,null,2),
+  "application/geo+json"
+ );
+});
+
+/* ==========================================================
+   DATA READINESS
+========================================================== */
+
+function checkReady(){
+ if(csvLoaded&&geoLoaded){
+  setStatus(
+   "Both datasets loaded successfully: "+
+   allRecords.length.toLocaleString()+" interview records and "+
+   eaFeatures.length.toLocaleString()+" EA features."
+  );
+
+  renderAll();
+  fitData();
+ }else if(csvLoaded){
+  setStatus("CSV loaded. Upload Census_EAs_Geo.json to display EA boundaries.");
+ }else if(geoLoaded){
+  setStatus("EA boundaries loaded. Upload the GLFS interview CSV.");
+ }
+}
+
+/* ==========================================================
+   MAP SCALE
+========================================================== */
+
+function updateScale(){
+ const latitude=map.getCenter().lat;
+ const zoom=map.getZoom();
+
+ const metresPerPixel=
+  40075016.686*Math.cos(latitude*Math.PI/180)/
+  Math.pow(2,zoom+8);
+
+ const target=150;
+ const raw=metresPerPixel*target;
+
+ const values=[
+  50,100,200,250,500,1000,2000,
+  5000,10000,20000,50000
+ ];
+
+ const distance=values.reduce((best,value)=>
+  Math.abs(value-raw)<Math.abs(best-raw)?value:best,
+  values[0]
+ );
+
+ $("scaleLine").style.width=
+  Math.max(35,Math.min(190,distance/metresPerPixel))+"px";
+
+ $("scaleLabel").textContent=
+  distance>=1000?(distance/1000)+" km":distance+" m";
+}
+
+map.on("zoomend moveend",updateScale);
+
+/* ==========================================================
+   INITIALISE
+========================================================== */
+
+async function initialise(){
+ updateScale();
+
+ /*
+  Try automatic loading first.
+  If the HTML is opened with file://, browsers may block fetch.
+  The two file-upload controls remain available as a fallback.
+ */
+ await Promise.all([
+  loadGeoJSONFromURL(),
+  loadCSVFromURL()
+ ]);
+
+ if(!csvLoaded&&!geoLoaded){
+  setStatus(
+   "Automatic loading was unavailable. Please select both files using the upload controls."
+  );
+ }
+}
+
+$("reloadData").addEventListener("click",async()=>{
+ await Promise.all([
+  loadGeoJSONFromURL(),
+  loadCSVFromURL()
+ ]);
+});
+
+initialise();
+
+</script>
+</body>
+</html>
