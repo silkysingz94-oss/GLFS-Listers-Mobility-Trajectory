@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GBoS GEOAI | GLFS Listers Mobility Trajectory Intelligence</title>
+<title>GBoS GEOAI | GLFS Listers Mobility Intelligence</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -12,158 +12,77 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <style>
-:root{
- --green:#14532d;
- --green2:#166534;
- --dark:#102b24;
- --light:#f3f7f4;
- --border:#dce5df;
- --muted:#64748b;
- --blue:#2563eb;
- --orange:#ea580c;
-}
+:root{--green:#14532d;--dark:#102b24;--border:#dce5df;--muted:#64748b}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;color:#172b24}
+html,body{height:100%;margin:0;font-family:Arial,sans-serif;color:#172b24}
 body{overflow:hidden;background:#edf2ee}
 button,input,select{font:inherit}
 button{cursor:pointer}
 #app{height:100%;display:flex;flex-direction:column}
-header{
- min-height:66px;background:var(--dark);color:white;
- display:flex;align-items:center;justify-content:space-between;
- padding:10px 20px;gap:15px;z-index:1000
-}
+header{min-height:65px;background:var(--dark);color:white;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;gap:12px}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-icon{
- width:42px;height:42px;border-radius:10px;background:#1d7044;
- display:grid;place-items:center;font-size:20px
-}
-.brand h1{font-size:16px;margin:0 0 4px;font-weight:800;letter-spacing:.3px}
-.brand p{font-size:11px;margin:0;color:#c7d9ce}
-.header-status{font-size:11px;color:#d5e7dc;text-align:right}
-.header-status strong{color:#fff}
-main{
- min-height:0;flex:1;display:grid;
- grid-template-columns:310px minmax(300px,1fr) 300px;
- gap:10px;padding:10px
-}
-.panel{
- min-height:0;background:#fff;border:1px solid var(--border);
- border-radius:10px;overflow:auto;box-shadow:0 2px 8px #142c2410
-}
-.panel-section{padding:13px;border-bottom:1px solid #edf1ee}
-.section-title{
- font-size:12px;font-weight:800;color:var(--green);
- text-transform:uppercase;letter-spacing:.5px;margin:0 0 11px
-}
-.field{margin-bottom:10px}
-.field:last-child{margin-bottom:0}
-label{display:block;font-size:11px;font-weight:700;color:#475569;margin-bottom:5px}
-input[type=file],select,input[type=date],input[type=number]{
- width:100%;padding:8px;border:1px solid #cbd5d1;border-radius:6px;
- background:#fff;color:#1f2937;font-size:12px;min-height:34px
-}
-input[type=file]{padding:6px;font-size:11px}
+.brand-icon{width:40px;height:40px;border-radius:9px;background:#1d7044;display:grid;place-items:center;font-size:19px}
+.brand h1{font-size:15px;margin:0 0 4px}
+.brand p{font-size:10px;margin:0;color:#c7d9ce}
+.header-status{text-align:right;font-size:10px;color:#d5e7dc}
+main{min-height:0;flex:1;display:grid;grid-template-columns:295px minmax(300px,1fr) 285px;gap:9px;padding:9px}
+.panel{min-height:0;background:#fff;border:1px solid var(--border);border-radius:9px;overflow:auto}
+.panel-section{padding:12px;border-bottom:1px solid #edf1ee}
+.section-title{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
+.field{margin-bottom:9px}
+label{display:block;font-size:10px;font-weight:700;color:#475569;margin-bottom:5px}
+input[type=file],select{width:100%;padding:8px;border:1px solid #cbd5d1;border-radius:6px;background:white;font-size:11px;min-height:33px}
 input[type=checkbox]{accent-color:var(--green)}
-.hint{font-size:10px;color:var(--muted);line-height:1.45;margin-top:5px}
-.btn-row{display:flex;gap:6px;flex-wrap:wrap}
-.btn{
- border:0;border-radius:6px;padding:9px 11px;font-size:11px;
- font-weight:700;background:#e8eee9;color:#263b30
-}
-.btn:hover{filter:brightness(.96)}
-.btn-primary{background:var(--green2);color:white}
-.btn-dark{background:#183d30;color:white}
+input[type=range]{width:100%;accent-color:var(--green)}
+.btn{border:0;border-radius:6px;padding:9px 10px;font-size:10px;font-weight:700;background:#e8eee9;color:#263b30}
+.btn-primary{background:#166534;color:white}
 .btn-blue{background:#2563eb;color:white}
 .btn-orange{background:#ea580c;color:white}
-.btn-danger{background:#fee2e2;color:#991b1b}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .full{width:100%}
-.status{
- padding:8px;border-radius:6px;background:#f1f5f9;
- color:#475569;font-size:10px;line-height:1.5;overflow-wrap:anywhere
-}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap}
+.status{padding:8px;border-radius:6px;background:#f1f5f9;color:#475569;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 .status.ok{background:#ecfdf5;color:#166534}
-.status.error{background:#fef2f2;color:#991b1b}
 .status.warn{background:#fff7ed;color:#9a3412}
-#map-wrap{position:relative;min-width:0;min-height:0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
-#map{height:100%;width:100%;background:#e8eee9}
-.map-tools{
- position:absolute;top:10px;left:55px;z-index:700;
- display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 70px)
-}
-.map-chip{
- background:#fff;border:1px solid #d7e0da;border-radius:6px;
- padding:7px 9px;font-size:10px;font-weight:700;box-shadow:0 1px 5px #0002
-}
-.map-legend{
- position:absolute;right:12px;bottom:25px;z-index:700;
- background:#fff;padding:10px 12px;border-radius:8px;
- box-shadow:0 2px 8px #0002;font-size:10px;line-height:1.8
-}
-.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
-.legend-line{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
-#map-message{
- position:absolute;z-index:800;top:55px;left:50%;transform:translateX(-50%);
- background:#102b24;color:white;padding:8px 12px;border-radius:6px;
- font-size:11px;display:none;max-width:85%;text-align:center
-}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kpi{background:#f4f8f5;border:1px solid #e5ece7;border-radius:8px;padding:10px}
-.kpi .value{font-size:21px;font-weight:800;color:var(--green);margin-bottom:3px}
-.kpi .name{font-size:10px;color:#64748b}
-.progress-wrap{height:7px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:8px 0}
-#progress{height:100%;width:0;background:#16a34a;transition:width .05s linear}
-.timeline-labels{display:flex;justify-content:space-between;font-size:10px;color:#64748b}
-input[type=range]{width:100%;accent-color:var(--green)}
-.playback{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.playback .btn{padding:10px 4px}
-.small-stat{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #eef2ef;font-size:11px}
-.small-stat span:first-child{color:#64748b}
+.status.error{background:#fef2f2;color:#991b1b}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:5px}
+.small-stat{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #eef2ef;font-size:10px}
+.small-stat span{color:#64748b}
 .small-stat strong{text-align:right;overflow-wrap:anywhere}
-.record-list{max-height:230px;overflow:auto}
-.record{border-bottom:1px solid #edf1ee;padding:8px 0;font-size:10px;line-height:1.5}
+#map-wrap{position:relative;min-width:0;min-height:0;border:1px solid var(--border);border-radius:9px;overflow:hidden}
+#map{height:100%;width:100%;background:#e8eee9}
+.map-tools{position:absolute;top:10px;left:55px;z-index:700;display:flex;gap:5px;flex-wrap:wrap}
+.map-chip{background:white;border:1px solid #d7e0da;border-radius:6px;padding:7px 9px;font-size:10px;font-weight:700;box-shadow:0 1px 5px #0002}
+.map-legend{position:absolute;right:10px;bottom:22px;z-index:700;background:white;padding:9px 11px;border-radius:7px;box-shadow:0 2px 8px #0002;font-size:10px;line-height:1.8}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.line{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
+#map-message{position:absolute;z-index:800;top:55px;left:50%;transform:translateX(-50%);background:#102b24;color:white;padding:8px 12px;border-radius:6px;font-size:10px;display:none;max-width:85%;text-align:center}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.kpi{background:#f4f8f5;border:1px solid #e5ece7;border-radius:7px;padding:9px}
+.kpi .value{font-size:19px;font-weight:800;color:var(--green);margin-bottom:3px}
+.kpi .name{font-size:9px;color:#64748b}
+.progress-wrap{height:7px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:7px 0}
+#progress{height:100%;width:0;background:#16a34a}
+.timeline-labels{display:flex;justify-content:space-between;font-size:9px;color:#64748b}
+.playback{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.playback .btn{padding:9px 3px}
+.record-list{max-height:220px;overflow:auto}
+.record{border-bottom:1px solid #edf1ee;padding:7px 0;font-size:9px;line-height:1.5;cursor:pointer}
 .record strong{color:#183d30}
-.point-number{
- width:21px;height:21px;border-radius:50%;background:#2563eb;color:#fff;
- border:2px solid #fff;display:grid;place-items:center;
- font-size:9px;font-weight:800;box-shadow:0 1px 5px #0005
-}
-.moving-marker{
- width:34px;height:34px;border-radius:50%;background:#f97316;
- border:3px solid #fff;box-shadow:0 0 0 5px #f9731640,0 2px 8px #0005;
- display:grid;place-items:center;color:#fff;font-size:14px
-}
-footer{
- min-height:28px;background:#fff;border-top:1px solid var(--border);
- padding:6px 14px;font-size:9px;color:#64748b;
- display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap
-}
-@media(max-width:1050px){
- main{grid-template-columns:270px minmax(260px,1fr)}
- #right-panel{display:none}
-}
-@media(max-width:700px){
- body{overflow:auto}
- #app{min-height:100%;height:auto}
- header{align-items:flex-start}
- main{display:flex;flex-direction:column;height:auto}
- #left-panel{max-height:none}
- #map-wrap{height:60vh;min-height:420px;order:2}
- #right-panel{display:block;order:3}
-}
+footer{min-height:27px;background:white;border-top:1px solid var(--border);padding:6px 12px;font-size:9px;color:#64748b;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+@media(max-width:1050px){main{grid-template-columns:260px minmax(260px,1fr)}#right-panel{display:none}}
+@media(max-width:700px){body{overflow:auto}#app{height:auto;min-height:100%}main{display:flex;flex-direction:column}#map-wrap{height:58vh;min-height:400px;order:2}#right-panel{display:block;order:3}}
 </style>
 </head>
 
 <body>
 <div id="app">
-
 <header>
  <div class="brand">
   <div class="brand-icon"><i class="fa-solid fa-route"></i></div>
   <div>
    <h1>GBoS GEOAI | GLFS Listers Mobility Trajectory Intelligence</h1>
-   <p>Enumerator activity • Compound visits • Household enumeration • GPS movement sequence</p>
+   <p>Enumerator activity • Compound visits • Household linkage • GPS movement sequence</p>
   </div>
  </div>
  <div class="header-status">
@@ -173,45 +92,26 @@ footer{
 </header>
 
 <main>
-
-<!-- LEFT CONTROL PANEL -->
 <aside class="panel" id="left-panel">
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-database"></i> GitHub data sources</h3>
+  <div class="small-stat"><span>Compound CSV</span><strong id="compound-source-state">Waiting</strong></div>
+  <div class="small-stat"><span>Household CSV</span><strong id="household-source-state">Waiting</strong></div>
+  <div class="small-stat"><span>EA boundary JSON</span><strong id="ea-source-state">Waiting</strong></div>
 
-  <div class="small-stat">
-   <span>Compound CSV</span>
-   <strong id="compound-source-state">Waiting</strong>
-  </div>
-  <div class="small-stat">
-   <span>Household CSV</span>
-   <strong id="household-source-state">Waiting</strong>
-  </div>
-  <div class="small-stat">
-   <span>EA boundary JSON</span>
-   <strong id="ea-source-state">Waiting</strong>
-  </div>
-
-  <div class="hint" style="margin:9px 0">
-   All three files are fetched directly from your public GitHub repository.
-  </div>
+  <p class="hint">Compound and EA data load independently. The household file is optional until it is added to the repository.</p>
 
   <button class="btn btn-primary full" id="refresh-github">
-   <i class="fa-solid fa-rotate"></i> Update All 3 GitHub Files
+   <i class="fa-solid fa-rotate"></i> Update GitHub datasets
   </button>
 
-  <div id="data-status" class="status" style="margin-top:9px">
-   Connecting to GitHub datasets...
-  </div>
+  <div id="data-status" class="status" style="margin-top:8px">Connecting to GitHub...</div>
+  <div class="hint">Last update: <span id="last-update">Not yet loaded</span></div>
 
-  <div class="hint">
-   Last update: <span id="last-update">Not yet loaded</span>
-  </div>
-
-  <details style="margin-top:10px">
-   <summary style="font-size:11px;font-weight:700;cursor:pointer">Optional manual file upload</summary>
-   <div class="field" style="margin-top:10px">
+  <details style="margin-top:9px">
+   <summary style="font-size:10px;font-weight:700;cursor:pointer">Optional manual file upload</summary>
+   <div class="field" style="margin-top:9px">
     <label>Compound CSV</label>
     <input type="file" id="compound-file" accept=".csv">
    </div>
@@ -228,40 +128,14 @@ footer{
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-filter"></i> Administrative filters</h3>
-
-  <div class="field">
-   <label>Region / LGA</label>
-   <select id="lga-filter"><option value="">All LGAs</option></select>
-  </div>
-  <div class="field">
-   <label>District</label>
-   <select id="district-filter"><option value="">All districts</option></select>
-  </div>
-  <div class="field">
-   <label>Ward</label>
-   <select id="ward-filter"><option value="">All wards</option></select>
-  </div>
-  <div class="field">
-   <label>Settlement</label>
-   <select id="settlement-filter"><option value="">All settlements</option></select>
-  </div>
-  <div class="field">
-   <label>Enumeration Area</label>
-   <select id="ea-filter"><option value="">All enumeration areas</option></select>
-  </div>
-  <div class="field">
-   <label>Enumerator</label>
-   <select id="interviewer-filter"><option value="">All enumerators</option></select>
-  </div>
-  <div class="field">
-   <label>Team</label>
-   <select id="team-filter"><option value="">All teams</option></select>
-  </div>
-  <div class="field">
-   <label>Visit date</label>
-   <select id="date-filter"><option value="">All dates</option></select>
-  </div>
-
+  <div class="field"><label>Region / LGA</label><select id="lga-filter"><option value="">All LGAs</option></select></div>
+  <div class="field"><label>District</label><select id="district-filter"><option value="">All districts</option></select></div>
+  <div class="field"><label>Ward</label><select id="ward-filter"><option value="">All wards</option></select></div>
+  <div class="field"><label>Settlement</label><select id="settlement-filter"><option value="">All settlements</option></select></div>
+  <div class="field"><label>Enumeration Area</label><select id="ea-filter"><option value="">All EAs</option></select></div>
+  <div class="field"><label>Enumerator</label><select id="interviewer-filter"><option value="">All enumerators</option></select></div>
+  <div class="field"><label>Team</label><select id="team-filter"><option value="">All teams</option></select></div>
+  <div class="field"><label>Visit date</label><select id="date-filter"><option value="">All dates</option></select></div>
   <div class="btn-row">
    <button class="btn btn-primary" id="apply-filter">Apply filters</button>
    <button class="btn" id="reset-filter">Reset filters</button>
@@ -270,19 +144,17 @@ footer{
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-play"></i> Movement animation</h3>
-
   <div class="field">
    <label>Playback speed</label>
    <select id="speed">
-    <option value="0.25">0.25× Slow</option>
-    <option value="0.5">0.5×</option>
+    <option value=".25">0.25× Slow</option>
+    <option value=".5">0.5×</option>
     <option value="1" selected>1× Normal</option>
     <option value="2">2× Fast</option>
     <option value="4">4× Very fast</option>
     <option value="8">8× Maximum</option>
    </select>
   </div>
-
   <div class="field">
    <label>Animation time per segment</label>
    <select id="interval">
@@ -293,15 +165,13 @@ footer{
     <option value="10">10 seconds</option>
    </select>
   </div>
-
   <div class="playback">
    <button class="btn btn-primary" id="play"><i class="fa-solid fa-play"></i><br>Play</button>
    <button class="btn" id="pause"><i class="fa-solid fa-pause"></i><br>Pause</button>
    <button class="btn" id="restart"><i class="fa-solid fa-rotate-left"></i><br>Restart</button>
    <button class="btn" id="next"><i class="fa-solid fa-forward-step"></i><br>Next</button>
   </div>
-
-  <div style="margin-top:12px">
+  <div style="margin-top:10px">
    <div class="timeline-labels">
     <span id="timeline-start">Start</span>
     <span id="timeline-current">0 / 0</span>
@@ -310,15 +180,11 @@ footer{
    <div class="progress-wrap"><div id="progress"></div></div>
    <input type="range" id="timeline" min="0" max="1000" value="0">
   </div>
-
-  <div class="hint" id="movement-status" style="margin-top:8px">
-   Waiting for movement records.
-  </div>
+  <div class="hint" id="movement-status">Waiting for GPS records.</div>
  </section>
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-layer-group"></i> Map display</h3>
-
   <div class="field">
    <label>Basemap</label>
    <select id="basemap">
@@ -328,10 +194,9 @@ footer{
     <option value="terrain">Terrain</option>
    </select>
   </div>
-
   <div class="field">
-   <label><input type="checkbox" id="show-points" checked> Show visited compound points</label>
-   <label><input type="checkbox" id="show-track" checked> Show movement line</label>
+   <label><input type="checkbox" id="show-points" checked> Show compound points</label>
+   <label><input type="checkbox" id="show-track" checked> Show movement lines</label>
    <label><input type="checkbox" id="show-ea" checked> Show EA boundaries</label>
    <label><input type="checkbox" id="show-labels"> Show point numbers</label>
    <label><input type="checkbox" id="fit-map" checked> Zoom to filtered records</label>
@@ -347,25 +212,22 @@ footer{
  </section>
 </aside>
 
-<!-- MAP -->
 <div id="map-wrap">
  <div id="map"></div>
  <div class="map-tools">
   <div class="map-chip"><i class="fa-solid fa-location-dot" style="color:#2563eb"></i> Compound locations</div>
-  <div class="map-chip"><i class="fa-solid fa-person-walking" style="color:#ea580c"></i> Moving enumerator</div>
+  <div class="map-chip"><i class="fa-solid fa-person-walking" style="color:#ea580c"></i> Enumerator movement</div>
  </div>
  <div id="map-message"></div>
  <div class="map-legend">
-  <div><span class="legend-dot" style="background:#2563eb"></span>Recorded compound</div>
-  <div><span class="legend-dot" style="background:#ea580c"></span>Moving enumerator</div>
-  <div><span class="legend-line" style="background:#ea580c"></span>Movement sequence</div>
-  <div><span class="legend-line" style="background:#16a34a"></span>EA boundary</div>
+  <div><span class="dot" style="background:#2563eb"></span>Recorded compound</div>
+  <div><span class="dot" style="background:#ea580c"></span>Moving enumerator</div>
+  <div><span class="line" style="background:#ea580c"></span>Movement sequence</div>
+  <div><span class="line" style="background:#16a34a"></span>EA boundary</div>
  </div>
 </div>
 
-<!-- RIGHT ANALYTICS -->
 <aside class="panel" id="right-panel">
-
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-chart-column"></i> Activity summary</h3>
   <div class="kpi-grid">
@@ -398,26 +260,23 @@ footer{
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-list"></i> Compound visit sequence</h3>
-  <div id="visit-list" class="record-list">
-   <div class="hint">Waiting for compound records.</div>
-  </div>
+  <div id="visit-list" class="record-list"><div class="hint">Waiting for records.</div></div>
  </section>
 
  <section class="panel-section">
-  <h3 class="section-title"><i class="fa-solid fa-circle-info"></i> Methodology</h3>
-  <div class="hint" style="font-size:10px">
-   <b>Data:</b> Compound, household and EA boundary data are loaded from the configured GitHub repository.
+  <h3 class="section-title"><i class="fa-solid fa-circle-info"></i> Methodology and limitations</h3>
+  <div class="hint">
+   <b>Data:</b> Compound CSV and EA JSON are fetched from the public GitHub repository. Household CSV is an optional linked dataset.
    <br><br>
-   <b>GPS:</b> Compound x is interpreted as longitude and y as latitude.
+   <b>GPS:</b> x is interpreted as longitude and y as latitude.
    <br><br>
-   <b>Movement:</b> Records are sorted by CreationDate and grouped by enumerator and visit date. The marker is interpolated between recorded compound locations.
+   <b>Movement:</b> Records are sorted by CreationDate and grouped by enumerator and visit date.
    <br><br>
    <b>Household linkage:</b> Household ParentGlobalID is matched to compound GlobalID.
    <br><br>
-   <b>Limitation:</b> Connecting lines are straight-line representations between recorded GPS points, not continuous GPS tracks or measured road routes.
+   <b>Limitation:</b> Connecting lines are straight-line representations between recorded GPS points, not continuous GPS tracking or measured road routes.
   </div>
  </section>
-
 </aside>
 </main>
 
@@ -425,13 +284,16 @@ footer{
  <span>Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics</span>
  <span>GBoS GEOAI • Research and educational use</span>
 </footer>
-
 </div>
 
 <script>
-/* ============================================================
-   1. GITHUB DATA SOURCES
-============================================================ */
+/* =========================================================
+   1. GITHUB FILE PATHS
+   Household URL is retained, but loaded as OPTIONAL.
+========================================================= */
+
+const REPO_API =
+"https://api.github.com/repos/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/contents/";
 
 const EA_JSON_URL =
 "https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/Census_EAs_Geo.json";
@@ -443,67 +305,44 @@ const HOUSEHOLD_CSV_URL =
 "https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/GLFS_27hh1_071126_EXCEL.csv";
 
 const DEFAULT_CENTER=[13.45,-15.45];
-const DEFAULT_ZOOM=8;
 
-/* ============================================================
-   2. GLOBAL DATA
-============================================================ */
+/* =========================================================
+   2. GLOBAL VARIABLES
+========================================================= */
 
-let compoundRaw=[];
-let householdRaw=[];
-let compounds=[];
-let households=[];
-let filtered=[];
-let eaGeoJSON=null;
-let eaLayer=null;
-
+let compoundRaw=[],householdRaw=[];
+let compounds=[],households=[],filtered=[];
+let eaGeoJSON=null,eaLayer=null;
 let householdLookup=new Map();
 let tracks=[];
+let animationFrame=null,animationRunning=false;
+let animationProgress=0,lastFrameTime=null;
+let refreshInProgress=false;
 
 let pointLayer=L.layerGroup();
 let trackLayer=L.layerGroup();
 let movingLayer=L.layerGroup();
 
-let animationFrame=null;
-let animationRunning=false;
-let animationProgress=0;
-let lastFrameTime=null;
+function $(id){return document.getElementById(id)}
 
-let lastSuccessfulUpdate=null;
-let refreshInProgress=false;
+/* =========================================================
+   3. MAP INITIALIZATION
+========================================================= */
 
-/* ============================================================
-   3. MAP
-============================================================ */
-
-const map=L.map("map",{
- zoomControl:true,
- preferCanvas:true
-}).setView(DEFAULT_CENTER,DEFAULT_ZOOM);
+const map=L.map("map",{zoomControl:true,preferCanvas:true})
+ .setView(DEFAULT_CENTER,8);
 
 const baseLayers={
- street:L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom:19,attribution:"© OpenStreetMap"}
- ),
- satellite:L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:19,attribution:"Tiles © Esri"}
- ),
+ street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {maxZoom:19,attribution:"© OpenStreetMap"}),
+ satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19,attribution:"© Esri"}),
  hybrid:L.layerGroup([
-  L.tileLayer(
-   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-   {maxZoom:19}
-  ),
-  L.tileLayer(
-   "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-   {maxZoom:19}
-  )
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19}),
+  L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19})
  ]),
- terrain:L.tileLayer(
-  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-  {maxZoom:17,attribution:"© OpenTopoMap"}
- )
+ terrain:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  {maxZoom:17,attribution:"© OpenTopoMap"})
 };
 
 baseLayers.street.addTo(map);
@@ -513,169 +352,108 @@ movingLayer.addTo(map);
 
 $("basemap").addEventListener("change",e=>{
  Object.values(baseLayers).forEach(layer=>{
-  if(map.hasLayer(layer)) map.removeLayer(layer);
+  if(map.hasLayer(layer))map.removeLayer(layer);
  });
  (baseLayers[e.target.value]||baseLayers.street).addTo(map);
 });
 
-/* ============================================================
-   4. GENERAL UTILITIES
-============================================================ */
+/* =========================================================
+   4. UTILITIES
+========================================================= */
 
-function $(id){return document.getElementById(id)}
-
-function clean(v){
- return v===null||v===undefined?"":String(v).trim();
-}
+function clean(v){return v===null||v===undefined?"":String(v).trim()}
 
 function firstValue(row,names){
- for(const name of names){
-  if(row[name]!==undefined && clean(row[name])!=="") return row[name];
- }
  const keys=Object.keys(row||{});
- for(const name of names){
-  const key=keys.find(k=>k.trim().toLowerCase()===name.toLowerCase());
-  if(key && clean(row[key])!=="") return row[key];
+ for(const n of names){
+  if(row[n]!==undefined&&clean(row[n])!=="")return row[n];
+  const k=keys.find(x=>x.trim().toLowerCase()===n.toLowerCase());
+  if(k&&clean(row[k])!=="")return row[k];
  }
  return "";
 }
 
-function parseCoordinate(v){
- if(v===null||v===undefined||String(v).trim()==="") return null;
+function num(v){
+ if(v===null||v===undefined||String(v).trim()==="")return null;
  const n=Number(String(v).replace(/,/g,"").trim());
  return Number.isFinite(n)?n:null;
 }
 
 function parseDate(v){
- if(v===null||v===undefined||v==="") return null;
+ if(!v)return null;
  if(typeof v==="number"){
   return new Date(v);
  }
  const s=String(v).trim();
-
- if(/^\d{13}$/.test(s)) return new Date(Number(s));
- if(/^\d{10}$/.test(s)) return new Date(Number(s)*1000);
-
+ if(/^\d{13}$/.test(s))return new Date(Number(s));
+ if(/^\d{10}$/.test(s))return new Date(Number(s)*1000);
  if(/^\d{5}(\.\d+)?$/.test(s)){
   return new Date(Date.UTC(1899,11,30)+Number(s)*86400000);
  }
-
  const d=new Date(s);
  return Number.isNaN(d.getTime())?null:d;
 }
 
-function formatDate(d){
- return d?d.toLocaleDateString():"Unknown";
-}
+function fmtDate(d){return d?d.toLocaleDateString():"Unknown"}
+function fmtDateTime(d){return d?d.toLocaleString():"Unknown"}
+function fmt(n){return Number(n||0).toLocaleString()}
 
-function formatDateTime(d){
- return d?d.toLocaleString():"Unknown";
-}
-
-function numberFormat(n){
- return Number(n||0).toLocaleString();
-}
-
-function uniqueValues(rows,key){
+function unique(rows,key){
  return [...new Set(rows.map(r=>clean(r[key])).filter(Boolean))]
   .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
 
-function escapeHTML(v){
+function esc(v){
  return String(v??"").replace(/[&<>"']/g,c=>({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
  }[c]));
 }
 
-function setStatus(message,type=""){
+function status(message,type=""){
  $("data-status").textContent=message;
  $("data-status").className="status "+type;
 }
 
-function showMapMessage(message){
+function mapMessage(message){
  const el=$("map-message");
  el.textContent=message;
  el.style.display="block";
- clearTimeout(showMapMessage.timer);
- showMapMessage.timer=setTimeout(()=>el.style.display="none",3500);
+ clearTimeout(mapMessage.timer);
+ mapMessage.timer=setTimeout(()=>el.style.display="none",3500);
 }
 
-/* ============================================================
+/* =========================================================
    5. NORMALIZE COMPOUND RECORDS
-============================================================ */
+========================================================= */
 
 function normalizeCompound(row,index){
- const x=parseCoordinate(firstValue(row,[
-  "x","X","longitude","Longitude","lon","LONGITUDE"
- ]));
-
- const y=parseCoordinate(firstValue(row,[
-  "y","Y","latitude","Latitude","lat","LATITUDE"
- ]));
-
- const created=parseDate(firstValue(row,[
-  "CreationDate","creationdate","CreatedDate","created_date"
- ]));
-
- const interviewer=clean(firstValue(row,[
-  "EDF_interviewer","Interviewer","interviewer",
-  "Enumerator","enumerator","Creator"
- ]))||"Unknown enumerator";
-
- const team=clean(firstValue(row,[
-  "EDF_team","Team","team"
- ]))||"Unknown team";
-
- const globalID=clean(firstValue(row,["GlobalID","globalid"]));
+ const x=num(firstValue(row,["x","X","longitude","Longitude","lon"]));
+ const y=num(firstValue(row,["y","Y","latitude","Latitude","lat"]));
+ const created=parseDate(firstValue(row,["CreationDate","creationdate","CreatedDate"]));
 
  return {
   ...row,
   _index:index,
-  globalID,
+  globalID:clean(firstValue(row,["GlobalID","globalid"])),
   x,y,
-  hasGPS:x!==null && y!==null &&
-    x>=-180 && x<=180 && y>=-90 && y<=90,
+  hasGPS:x!==null&&y!==null&&x>=-180&&x<=180&&y>=-90&&y<=90,
   created,
   date:created?created.toISOString().slice(0,10):"Unknown",
-  interviewer,
-  team,
-
+  interviewer:clean(firstValue(row,["EDF_interviewer","Interviewer","interviewer","Enumerator"]))||"Unknown enumerator",
+  team:clean(firstValue(row,["EDF_team","Team","team"]))||"Unknown team",
   lga:clean(firstValue(row,["EDF_LGA","LGA","lga","Region"])),
   district:clean(firstValue(row,["EDF_district","District","district"])),
   ward:clean(firstValue(row,["EDF_wards","Ward","ward","Wards"])),
   settlement:clean(firstValue(row,["EDF_settlement","Settlement","settlement"])),
-  ea:clean(firstValue(row,[
-   "EDF_enum_areacode","Enumeration Area","EA","feacode","enum_areacode"
-  ])),
-
-  compoundNo:clean(firstValue(row,[
-   "Q1. Compound/Structure Number",
-   "Compound Actual Number",
-   "Compound Number",
-   "Q1"
-  ])),
-
-  address:clean(firstValue(row,[
-   "Q2. Compound/Structure Physical Address",
-   "Physical Address","Address"
-  ])),
-
-  owner:clean(firstValue(row,["Name of Compound Owner","Compound Owner"])),
-  landmark:clean(firstValue(row,["Q3.1 Name of Landmark / Property","Landmark"])),
-  unitStatus:clean(firstValue(row,["Q3. Status of Unit","Status of Unit"])),
-  householdStatus:clean(firstValue(row,[
-   "Q3.2 Does any household reside in this structure?"
-  ])),
-  totalHouseholds:parseCoordinate(firstValue(row,[
-   "Total Number of Households in Compound"
-  ]))||0,
-  dwellingStatus:clean(firstValue(row,["Q8. Status of Dwelling"]))
+  ea:clean(firstValue(row,["EDF_enum_areacode","Enumeration Area","EA","feacode","enum_areacode"])),
+  compoundNo:clean(firstValue(row,["Q1. Compound/Structure Number","Compound Actual Number","Compound Number","Q1"])),
+  address:clean(firstValue(row,["Q2. Compound/Structure Physical Address","Physical Address","Address"]))
  };
 }
 
-/* ============================================================
+/* =========================================================
    6. NORMALIZE HOUSEHOLD RECORDS
-============================================================ */
+========================================================= */
 
 function normalizeHousehold(row,index){
  return {
@@ -683,276 +461,248 @@ function normalizeHousehold(row,index){
   _index:index,
   globalID:clean(firstValue(row,["GlobalID","globalid"])),
   parentGlobalID:clean(firstValue(row,["ParentGlobalID","parentglobalid"])),
-  householdNo:clean(firstValue(row,[
-   "Q4. Household Number","Household Number","Q4"
-  ])),
-  head:clean(firstValue(row,[
-   "Q5. Name of Household Head","Name of Household Head","Household Head"
-  ])),
-  members:parseCoordinate(firstValue(row,[
-   "Q6. Total Members in The Household",
-   "Total Members in The Household"
-  ]))||0,
-  phone:clean(firstValue(row,[
-   "Q7. Contact Number of Household Head",
-   "Contact Number of Household Head"
-  ])),
-  interviewer:clean(firstValue(row,["hh_interviewer","Interviewer","Enumerator"])),
-  team:clean(firstValue(row,["hh_team","Team"]))
+  householdNo:clean(firstValue(row,["Q4. Household Number","Household Number","Q4"])),
+  head:clean(firstValue(row,["Q5. Name of Household Head","Name of Household Head","Household Head"])),
+  members:num(firstValue(row,["Q6. Total Members in The Household","Total Members in The Household"]))||0,
+  phone:clean(firstValue(row,["Q7. Contact Number of Household Head","Contact Number of Household Head"]))
  };
 }
 
-/* ============================================================
-   7. GITHUB CSV AND JSON FETCHING
-============================================================ */
+/* =========================================================
+   7. FETCH FUNCTIONS
+========================================================= */
 
-async function fetchCSV(url,filename){
- const response=await fetch(url+"?t="+Date.now(),{
+async function fetchText(url){
+ const response=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{
   cache:"no-store"
  });
-
- if(!response.ok){
-  throw new Error(filename+" HTTP "+response.status);
- }
-
- const csvText=await response.text();
-
- const result=Papa.parse(csvText,{
-  header:true,
-  skipEmptyLines:true,
-  dynamicTyping:false
- });
-
- if(result.errors?.length){
-  console.warn(filename+" parsing warnings",result.errors.slice(0,5));
- }
-
- if(!result.data || !result.data.length){
-  throw new Error(filename+" contains no data rows.");
- }
-
- return result.data;
+ if(!response.ok)throw new Error("HTTP "+response.status);
+ return await response.text();
 }
 
-async function fetchJSON(url,filename){
- const response=await fetch(url+"?t="+Date.now(),{
-  cache:"no-store"
+async function fetchCSV(url,name){
+ const txt=await fetchText(url);
+ const parsed=Papa.parse(txt,{
+  header:true,skipEmptyLines:true,dynamicTyping:false
  });
-
- if(!response.ok){
-  throw new Error(filename+" HTTP "+response.status);
- }
-
- return await response.json();
+ if(!parsed.data||!parsed.data.length)throw new Error(name+" has no data rows.");
+ return parsed.data;
 }
 
-/* ============================================================
-   8. HOUSEHOLD LINKAGE
-============================================================ */
+async function fetchJSON(url){
+ return JSON.parse(await fetchText(url));
+}
+
+/* =========================================================
+   8. OPTIONAL HOUSEHOLD FILE DISCOVERY
+   Search repository contents for a household CSV.
+========================================================= */
+
+async function discoverHouseholdFile(){
+ const response=await fetch(REPO_API+"?t="+Date.now(),{cache:"no-store"});
+ if(!response.ok)return null;
+
+ const files=await response.json();
+ const candidates=files.filter(f=>
+  f.type==="file"&&
+  /\.csv$/i.test(f.name)&&
+  /(household|hh)/i.test(f.name)
+ );
+
+ if(!candidates.length)return null;
+
+ // Prefer the expected file if it exists.
+ const exact=candidates.find(f=>
+  f.name.toLowerCase()==="glfs_27hh1_071126_excel.csv"
+ );
+
+ return exact||candidates[0];
+}
+
+/* =========================================================
+   9. HOUSEHOLD LINKAGE
+========================================================= */
 
 function buildHouseholdLookup(){
  householdLookup=new Map();
 
  households.forEach(h=>{
-  if(!h.parentGlobalID) return;
-
+  if(!h.parentGlobalID)return;
   if(!householdLookup.has(h.parentGlobalID)){
    householdLookup.set(h.parentGlobalID,[]);
   }
-
   householdLookup.get(h.parentGlobalID).push(h);
  });
 }
 
-/* ============================================================
-   9. LOAD EA BOUNDARIES
-============================================================ */
+/* =========================================================
+   10. EA BOUNDARIES
+========================================================= */
 
 function addEABoundaries(data){
- if(eaLayer){
-  map.removeLayer(eaLayer);
-  eaLayer=null;
- }
-
+ if(eaLayer)map.removeLayer(eaLayer);
  eaGeoJSON=data;
 
  eaLayer=L.geoJSON(data,{
   style:{
-   color:"#15803d",
-   weight:1.2,
-   opacity:.85,
-   fillColor:"#22c55e",
-   fillOpacity:.025
+   color:"#15803d",weight:1.1,opacity:.85,
+   fillColor:"#22c55e",fillOpacity:.025
   },
   onEachFeature:(feature,layer)=>{
    const p=feature.properties||{};
-   const code=firstValue(p,[
-    "feacode","FEACODE","EA_CODE","enum_areacode","ea_code"
-   ]);
+   const code=firstValue(p,["feacode","FEACODE","EA_CODE","enum_areacode","ea_code"]);
    const ward=firstValue(p,["wardname","WARDNAME","ward"]);
    const district=firstValue(p,["distname","DISTNAME","district"]);
 
    layer.bindPopup(
-    "<b>Enumeration Area</b><br>"+
-    "EA: "+escapeHTML(code||"Not available")+"<br>"+
-    "Ward: "+escapeHTML(ward||"Not available")+"<br>"+
-    "District: "+escapeHTML(district||"Not available")
+    "<b>Enumeration Area</b><br>EA: "+esc(code||"Not available")+
+    "<br>Ward: "+esc(ward||"Not available")+
+    "<br>District: "+esc(district||"Not available")
    );
   }
  });
 
- if($("show-ea").checked) eaLayer.addTo(map);
+ if($("show-ea").checked)eaLayer.addTo(map);
 }
 
-/* ============================================================
-   10. AUTOMATIC LOAD OF ALL THREE GITHUB FILES
-============================================================ */
+/* =========================================================
+   11. LOAD DATASETS INDEPENDENTLY
+   A household 404 does NOT stop compound or EA loading.
+========================================================= */
 
 async function loadAllGitHubFiles(){
- if(refreshInProgress) return;
-
+ if(refreshInProgress)return;
  refreshInProgress=true;
+
  $("refresh-github").disabled=true;
- $("refresh-github").innerHTML=
-  '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
-
+ $("refresh-github").innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
  $("header-state").textContent="Updating GitHub datasets...";
- setStatus("Connecting to GitHub and downloading all three files...");
 
- const oldLga=$("lga-filter").value;
- const oldDistrict=$("district-filter").value;
- const oldWard=$("ward-filter").value;
- const oldSettlement=$("settlement-filter").value;
- const oldEA=$("ea-filter").value;
- const oldInterviewer=$("interviewer-filter").value;
- const oldTeam=$("team-filter").value;
- const oldDate=$("date-filter").value;
+ const results={compound:false,household:false,ea:false};
+ const errors=[];
 
  try{
-  // Fetch all three datasets.
-  setStatus("1/3 Downloading compound CSV...");
-  $("compound-source-state").textContent="Loading";
+  // COMPOUND DATA
+  try{
+   $("compound-source-state").textContent="Loading...";
+   status("Downloading compound CSV...");
 
-  const compoundData=await fetchCSV(
-   COMPOUND_CSV_URL,
-   "Compound CSV"
-  );
+   const data=await fetchCSV(COMPOUND_CSV_URL,"Compound CSV");
+   compoundRaw=data;
+   compounds=data.map(normalizeCompound);
+   results.compound=true;
+   $("compound-source-state").textContent=fmt(compounds.length)+" loaded";
+  }catch(error){
+   errors.push("Compound CSV: "+error.message);
+   $("compound-source-state").textContent="Unavailable";
+  }
 
-  setStatus("2/3 Downloading household CSV...");
-  $("household-source-state").textContent="Loading";
+  // HOUSEHOLD DATA: try exact URL first, then repository discovery.
+  try{
+   $("household-source-state").textContent="Checking...";
+   status("Checking household CSV...");
 
-  const householdData=await fetchCSV(
-   HOUSEHOLD_CSV_URL,
-   "Household CSV"
-  );
+   let data=null;
+   let sourceName="";
 
-  setStatus("3/3 Downloading EA boundary JSON...");
-  $("ea-source-state").textContent="Loading";
+   try{
+    data=await fetchCSV(HOUSEHOLD_CSV_URL,"Household CSV");
+    sourceName="Expected household file";
+   }catch(exactError){
+    const candidate=await discoverHouseholdFile();
 
-  const eaData=await fetchJSON(
-   EA_JSON_URL,
-   "EA boundary JSON"
-  );
-
-  // Replace all three datasets only after successful download.
-  compoundRaw=compoundData;
-  householdRaw=householdData;
-
-  compounds=compoundData.map(normalizeCompound);
-  households=householdData.map(normalizeHousehold);
-
-  buildHouseholdLookup();
-  addEABoundaries(eaData);
-
-  // Rebuild filter options.
-  populateFilters();
-
-  // Restore previous selections when they still exist.
-  const previousFilters={
-   "lga-filter":oldLga,
-   "district-filter":oldDistrict,
-   "ward-filter":oldWard,
-   "settlement-filter":oldSettlement,
-   "ea-filter":oldEA,
-   "interviewer-filter":oldInterviewer,
-   "team-filter":oldTeam,
-   "date-filter":oldDate
-  };
-
-  Object.entries(previousFilters).forEach(([id,value])=>{
-   if([...$(id).options].some(o=>o.value===value)){
-    $(id).value=value;
+    if(candidate){
+     data=await fetchCSV(candidate.download_url||candidate.html_url,candidate.name);
+     sourceName=candidate.name;
+    }else{
+     throw new Error("No household CSV exists in the repository root.");
+    }
    }
-  });
 
-  // Rebuild map, tracks, filters and statistics.
+   householdRaw=data;
+   households=data.map(normalizeHousehold);
+   buildHouseholdLookup();
+
+   results.household=true;
+   $("household-source-state").textContent=fmt(households.length)+" loaded";
+   $("household-source-state").title=sourceName;
+
+  }catch(error){
+   // Clear stale household records rather than implying old data is current.
+   householdRaw=[];
+   households=[];
+   buildHouseholdLookup();
+
+   errors.push("Household CSV: "+error.message);
+   $("household-source-state").textContent="Not uploaded";
+  }
+
+  // EA BOUNDARIES
+  try{
+   $("ea-source-state").textContent="Loading...";
+   status("Downloading EA boundary JSON...");
+
+   const data=await fetchJSON(EA_JSON_URL);
+   addEABoundaries(data);
+   results.ea=true;
+   $("ea-source-state").textContent="Loaded";
+  }catch(error){
+   errors.push("EA JSON: "+error.message);
+   $("ea-source-state").textContent="Unavailable";
+  }
+
+  // Build dashboard from whatever successfully loaded.
+  populateFilters();
   applyFilters();
 
-  lastSuccessfulUpdate=new Date();
+  $("last-update").textContent=new Date().toLocaleString();
 
-  $("last-update").textContent=lastSuccessfulUpdate.toLocaleString();
+  const successful=[];
+  if(results.compound)successful.push("compound CSV");
+  if(results.household)successful.push("household CSV");
+  if(results.ea)successful.push("EA boundaries");
 
-  $("compound-source-state").textContent=
-   numberFormat(compounds.length)+" loaded";
+  if(results.compound||results.ea){
+   $("header-state").textContent="Available: "+successful.join(", ");
 
-  $("household-source-state").textContent=
-   numberFormat(households.length)+" loaded";
-
-  $("ea-source-state").textContent="Loaded";
-
-  $("header-state").textContent="All 3 GitHub datasets loaded";
-
-  setStatus(
-   "GitHub update successful: "+
-   numberFormat(compounds.length)+" compounds, "+
-   numberFormat(households.length)+" households and EA boundaries loaded.",
-   "ok"
-  );
-
- }catch(error){
-  console.error("GitHub update failed:",error);
-
-  $("header-state").textContent="GitHub update failed";
-
-  setStatus(
-   "Update failed: "+error.message+
-   ". Confirm that all three files exist in the repository and are publicly accessible.",
-   "error"
-  );
-
-  if(!compounds.length){
-   $("compound-source-state").textContent="Failed";
-   $("household-source-state").textContent="Failed";
-   $("ea-source-state").textContent="Failed";
+   if(errors.length){
+    status(
+     "Dashboard loaded with available datasets. "+errors.join(" | ")+
+     " Add the missing household CSV to GitHub or upload it manually.",
+     "warn"
+    );
+   }else{
+    status("All three datasets loaded successfully.","ok");
+   }
+  }else{
+   $("header-state").textContent="Dataset loading failed";
+   status(errors.join(" | "),"error");
   }
 
  }finally{
   refreshInProgress=false;
   $("refresh-github").disabled=false;
-  $("refresh-github").innerHTML=
-   '<i class="fa-solid fa-rotate"></i> Update All 3 GitHub Files';
+  $("refresh-github").innerHTML='<i class="fa-solid fa-rotate"></i> Update GitHub datasets';
  }
 }
 
 $("refresh-github").addEventListener("click",loadAllGitHubFiles);
 
-/* ============================================================
-   11. OPTIONAL MANUAL UPLOAD
-============================================================ */
+/* =========================================================
+   12. MANUAL UPLOAD
+========================================================= */
 
 function parseUploadedCSV(file,callback){
  Papa.parse(file,{
-  header:true,
-  skipEmptyLines:true,
-  dynamicTyping:false,
-  complete:results=>callback(results.data||[]),
-  error:error=>setStatus(error.message,"error")
+  header:true,skipEmptyLines:true,dynamicTyping:false,
+  complete:r=>callback(r.data||[]),
+  error:e=>status(e.message,"error")
  });
 }
 
 $("compound-file").addEventListener("change",e=>{
  const file=e.target.files[0];
- if(!file) return;
+ if(!file)return;
 
  parseUploadedCSV(file,data=>{
   compoundRaw=data;
@@ -960,13 +710,13 @@ $("compound-file").addEventListener("change",e=>{
   populateFilters();
   applyFilters();
   $("compound-source-state").textContent="Manual upload";
-  setStatus("Manual compound CSV loaded.","ok");
+  status("Manual compound CSV loaded.","ok");
  });
 });
 
 $("household-file").addEventListener("change",e=>{
  const file=e.target.files[0];
- if(!file) return;
+ if(!file)return;
 
  parseUploadedCSV(file,data=>{
   householdRaw=data;
@@ -975,38 +725,35 @@ $("household-file").addEventListener("change",e=>{
   updateAnalytics();
   updateVisitList();
   renderMap();
-  $("household-source-state").textContent="Manual upload";
-  setStatus("Manual household CSV loaded.","ok");
+  $("household-source-state").textContent=fmt(households.length)+" manual records";
+  status("Manual household CSV loaded and linked using ParentGlobalID.","ok");
  });
 });
 
 $("ea-file").addEventListener("change",e=>{
  const file=e.target.files[0];
- if(!file) return;
+ if(!file)return;
 
  const reader=new FileReader();
-
  reader.onload=()=>{
   try{
    addEABoundaries(JSON.parse(reader.result));
    $("ea-source-state").textContent="Manual upload";
-   setStatus("Manual EA JSON loaded.","ok");
+   status("Manual EA JSON loaded.","ok");
   }catch(error){
-   setStatus("Invalid EA JSON: "+error.message,"error");
+   status("Invalid EA JSON: "+error.message,"error");
   }
  };
-
  reader.readAsText(file);
 });
 
-/* ============================================================
-   12. FILTERS
-============================================================ */
+/* =========================================================
+   13. FILTERS
+========================================================= */
 
 function setOptions(id,values,label){
  const select=$(id);
  const old=select.value;
-
  select.innerHTML="";
 
  const first=document.createElement("option");
@@ -1015,24 +762,24 @@ function setOptions(id,values,label){
  select.appendChild(first);
 
  values.forEach(value=>{
-  const option=document.createElement("option");
-  option.value=value;
-  option.textContent=value;
-  select.appendChild(option);
+  const o=document.createElement("option");
+  o.value=value;
+  o.textContent=value;
+  select.appendChild(o);
  });
 
- if(values.includes(old)) select.value=old;
+ if(values.includes(old))select.value=old;
 }
 
 function populateFilters(){
- setOptions("lga-filter",uniqueValues(compounds,"lga"),"All LGAs");
- setOptions("district-filter",uniqueValues(compounds,"district"),"All districts");
- setOptions("ward-filter",uniqueValues(compounds,"ward"),"All wards");
- setOptions("settlement-filter",uniqueValues(compounds,"settlement"),"All settlements");
- setOptions("ea-filter",uniqueValues(compounds,"ea"),"All enumeration areas");
- setOptions("interviewer-filter",uniqueValues(compounds,"interviewer"),"All enumerators");
- setOptions("team-filter",uniqueValues(compounds,"team"),"All teams");
- setOptions("date-filter",uniqueValues(compounds,"date"),"All dates");
+ setOptions("lga-filter",unique(compounds,"lga"),"All LGAs");
+ setOptions("district-filter",unique(compounds,"district"),"All districts");
+ setOptions("ward-filter",unique(compounds,"ward"),"All wards");
+ setOptions("settlement-filter",unique(compounds,"settlement"),"All settlements");
+ setOptions("ea-filter",unique(compounds,"ea"),"All EAs");
+ setOptions("interviewer-filter",unique(compounds,"interviewer"),"All enumerators");
+ setOptions("team-filter",unique(compounds,"team"),"All teams");
+ setOptions("date-filter",unique(compounds,"date"),"All dates");
 }
 
 function applyFilters(){
@@ -1060,11 +807,7 @@ function applyFilters(){
   (!f.date||c.date===f.date)
  );
 
- filtered.sort((a,b)=>{
-  const ta=a.created?a.created.getTime():0;
-  const tb=b.created?b.created.getTime():0;
-  return ta-tb||a._index-b._index;
- });
+ filtered.sort((a,b)=>(a.created?.getTime()||0)-(b.created?.getTime()||0));
 
  buildTracks();
  renderMap();
@@ -1072,14 +815,13 @@ function applyFilters(){
  updateVisitList();
  resetTimeline();
 
- if($("fit-map").checked) fitFilteredMap();
+ if($("fit-map").checked)fitFilteredMap();
 
- $("header-records").textContent=numberFormat(filtered.length);
- $("header-state").textContent=filtered.length+" filtered records";
-
+ $("header-records").textContent=fmt(filtered.length);
+ $("header-state").textContent=fmt(filtered.length)+" filtered compound records";
  $("movement-status").textContent=tracks.length
-  ? tracks.length+" movement sequence(s) ready. Press Play."
-  : "No valid movement sequences. Check x, y and CreationDate.";
+  ?tracks.length+" movement sequence(s) ready."
+  :"No movement sequence. Check GPS and CreationDate.";
 }
 
 $("apply-filter").addEventListener("click",applyFilters);
@@ -1089,32 +831,27 @@ $("reset-filter").addEventListener("click",()=>{
   "lga-filter","district-filter","ward-filter","settlement-filter",
   "ea-filter","interviewer-filter","team-filter","date-filter"
  ].forEach(id=>$(id).value="");
-
  applyFilters();
 });
 
-/* ============================================================
-   13. BUILD MOVEMENT SEQUENCES
-============================================================ */
+/* =========================================================
+   14. BUILD ENUMERATOR MOVEMENT SEQUENCES
+========================================================= */
 
 function buildTracks(){
  tracks=[];
-
  const valid=filtered.filter(c=>c.hasGPS&&c.created);
  const grouped=new Map();
 
  valid.forEach(c=>{
   const key=c.interviewer+"||"+c.date;
-  if(!grouped.has(key)) grouped.set(key,[]);
+  if(!grouped.has(key))grouped.set(key,[]);
   grouped.get(key).push(c);
  });
 
  grouped.forEach((records,key)=>{
-  records.sort((a,b)=>
-   a.created.getTime()-b.created.getTime()||a._index-b._index
-  );
-
-  if(!records.length) return;
+  records.sort((a,b)=>a.created.getTime()-b.created.getTime());
+  if(!records.length)return;
 
   tracks.push({
    key,
@@ -1129,60 +866,57 @@ function buildTracks(){
  tracks.sort((a,b)=>a.start-b.start);
 }
 
-/* ============================================================
-   14. MAP MARKERS AND POPUPS
-============================================================ */
+/* =========================================================
+   15. MAP MARKERS AND POPUPS
+========================================================= */
 
-function makePointIcon(number){
+function pointIcon(n){
  return L.divIcon({
   className:"",
   html:$("show-labels").checked
-   ? `<div class="point-number">${number}</div>`
-   : '<div style="width:9px;height:9px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #0008"></div>',
-  iconSize:$("show-labels").checked?[21,21]:[11,11],
+   ?`<div style="width:21px;height:21px;border-radius:50%;background:#2563eb;color:white;border:2px solid white;display:grid;place-items:center;font-size:9px;font-weight:bold">${n}</div>`
+   :'<div style="width:10px;height:10px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #0008"></div>',
+  iconSize:$("show-labels").checked?[21,21]:[10,10],
   iconAnchor:$("show-labels").checked?[10,10]:[5,5]
  });
 }
 
-function makeMovingIcon(){
+function movingIcon(){
  return L.divIcon({
   className:"",
-  html:'<div class="moving-marker"><i class="fa-solid fa-person-walking"></i></div>',
-  iconSize:[34,34],
-  iconAnchor:[17,17]
+  html:'<div style="width:34px;height:34px;border-radius:50%;background:#f97316;border:3px solid white;box-shadow:0 0 0 5px #f9731640;display:grid;place-items:center;color:white"><i class="fa-solid fa-person-walking"></i></div>',
+  iconSize:[34,34],iconAnchor:[17,17]
  });
 }
 
 function compoundPopup(c){
  const linked=householdLookup.get(c.globalID)||[];
 
- const hhHTML=linked.length
-  ? linked.map(h=>`
-   <div style="padding:5px 0;border-top:1px solid #ddd">
-    <b>Household ${escapeHTML(h.householdNo||"—")}</b><br>
-    Head: ${escapeHTML(h.head||"—")}<br>
-    Members: ${numberFormat(h.members)}<br>
-    Contact: ${escapeHTML(h.phone||"—")}
-   </div>
-  `).join("")
-  : "<i>No linked household records found.</i>";
+ const householdHTML=linked.length
+  ?linked.map(h=>`
+   <div style="border-top:1px solid #ddd;padding:5px 0">
+    <b>Household ${esc(h.householdNo||"—")}</b><br>
+    Head: ${esc(h.head||"—")}<br>
+    Members: ${fmt(h.members)}<br>
+    Contact: ${esc(h.phone||"—")}
+   </div>`).join("")
+  :"<i>No linked household records available.</i>";
 
  return `
  <div style="min-width:220px;max-width:290px;font-size:11px;line-height:1.55">
-  <strong style="font-size:13px;color:#14532d">Compound / Structure</strong><br>
-  <b>Compound No:</b> ${escapeHTML(c.compoundNo||"—")}<br>
-  <b>Enumerator:</b> ${escapeHTML(c.interviewer)}<br>
-  <b>Team:</b> ${escapeHTML(c.team)}<br>
-  <b>LGA:</b> ${escapeHTML(c.lga||"—")}<br>
-  <b>District:</b> ${escapeHTML(c.district||"—")}<br>
-  <b>Ward:</b> ${escapeHTML(c.ward||"—")}<br>
-  <b>Settlement:</b> ${escapeHTML(c.settlement||"—")}<br>
-  <b>EA:</b> ${escapeHTML(c.ea||"—")}<br>
-  <b>Recorded:</b> ${escapeHTML(formatDateTime(c.created))}<br>
-  <b>GPS:</b> ${c.y.toFixed(6)}, ${c.x.toFixed(6)}<br>
-  <hr style="margin:6px 0">
-  <b>Linked households: ${linked.length}</b>
-  ${hhHTML}
+ <b style="font-size:13px;color:#14532d">Compound / Structure</b><br>
+ <b>Compound No:</b> ${esc(c.compoundNo||"—")}<br>
+ <b>Enumerator:</b> ${esc(c.interviewer)}<br>
+ <b>Team:</b> ${esc(c.team)}<br>
+ <b>LGA:</b> ${esc(c.lga||"—")}<br>
+ <b>District:</b> ${esc(c.district||"—")}<br>
+ <b>Ward:</b> ${esc(c.ward||"—")}<br>
+ <b>Settlement:</b> ${esc(c.settlement||"—")}<br>
+ <b>EA:</b> ${esc(c.ea||"—")}<br>
+ <b>Recorded:</b> ${esc(fmtDateTime(c.created))}<br>
+ <b>GPS:</b> ${c.y}, ${c.x}<hr>
+ <b>Linked households: ${linked.length}</b>
+ ${householdHTML}
  </div>`;
 }
 
@@ -1193,155 +927,110 @@ function renderMap(){
 
  if($("show-points").checked){
   let n=0;
-
   filtered.forEach(c=>{
-   if(!c.hasGPS) return;
+   if(!c.hasGPS)return;
    n++;
-
-   const marker=L.marker([c.y,c.x],{
-    icon:makePointIcon(n),
+   L.marker([c.y,c.x],{
+    icon:pointIcon(n),
     title:"Compound "+(c.compoundNo||n)
-   });
-
-   marker.bindPopup(compoundPopup(c));
-   marker.addTo(pointLayer);
+   }).bindPopup(compoundPopup(c)).addTo(pointLayer);
   });
  }
 
  if($("show-track").checked){
-  tracks.forEach(track=>{
-   if(track.records.length<2) return;
-
-   L.polyline(
-    track.records.map(c=>[c.y,c.x]),
-    {color:"#ea580c",weight:3,opacity:.75,dashArray:"7,6"}
-   ).addTo(trackLayer);
+  tracks.forEach(t=>{
+   if(t.records.length<2)return;
+   L.polyline(t.records.map(c=>[c.y,c.x]),{
+    color:"#ea580c",weight:3,opacity:.75,dashArray:"7,6"
+   }).addTo(trackLayer);
   });
  }
 
- tracks.forEach(track=>{
-  const first=track.records[0];
-
-  const marker=L.marker([first.y,first.x],{
-   icon:makeMovingIcon(),
-   zIndexOffset:1000
-  });
-
-  marker.bindPopup(
-   "<b>Enumerator:</b> "+escapeHTML(track.interviewer)+
-   "<br><b>Visit date:</b> "+escapeHTML(track.date)
-  );
-
-  marker.addTo(movingLayer);
-  track.marker=marker;
+ tracks.forEach(t=>{
+  const first=t.records[0];
+  t.marker=L.marker([first.y,first.x],{
+   icon:movingIcon(),zIndexOffset:1000
+  }).bindPopup("<b>Enumerator:</b> "+esc(t.interviewer)+
+   "<br><b>Visit date:</b> "+esc(t.date)).addTo(movingLayer);
  });
 
  if(eaLayer){
-  if($("show-ea").checked&&!map.hasLayer(eaLayer)){
-   eaLayer.addTo(map);
-  }
-  if(!$("show-ea").checked&&map.hasLayer(eaLayer)){
-   map.removeLayer(eaLayer);
-  }
+  if($("show-ea").checked&&!map.hasLayer(eaLayer))eaLayer.addTo(map);
+  if(!$("show-ea").checked&&map.hasLayer(eaLayer))map.removeLayer(eaLayer);
  }
 }
 
 function fitFilteredMap(){
  const coords=filtered.filter(c=>c.hasGPS).map(c=>[c.y,c.x]);
-
  if(coords.length){
   const bounds=L.latLngBounds(coords);
-  if(bounds.isValid()) map.fitBounds(bounds.pad(.12),{maxZoom:16});
+  if(bounds.isValid())map.fitBounds(bounds.pad(.12),{maxZoom:16});
  }else{
-  map.setView(DEFAULT_CENTER,DEFAULT_ZOOM);
+  map.setView(DEFAULT_CENTER,8);
  }
 }
 
-/* ============================================================
-   15. MOVEMENT ANIMATION
-============================================================ */
+/* =========================================================
+   16. MOVEMENT ANIMATION
+========================================================= */
 
-function getPlaybackDuration(){
+function duration(){
  const seconds=Number($("interval").value)||2;
- const maxSegments=Math.max(1,...tracks.map(t=>t.records.length-1));
- return Math.max(1000,maxSegments*seconds*1000);
+ const segments=Math.max(1,...tracks.map(t=>t.records.length-1));
+ return Math.max(1000,segments*seconds*1000);
 }
 
-function interpolateTrack(track,progress){
- const records=track.records;
+function interpolate(t,p){
+ const r=t.records;
+ if(r.length===1)return{lat:r[0].y,lng:r[0].x,index:0,record:r[0]};
 
- if(records.length===1){
-  return {
-   lat:records[0].y,
-   lng:records[0].x,
-   index:0,
-   record:records[0]
-  };
- }
-
- const scaled=Math.max(0,Math.min(1,progress))*(records.length-1);
- const index=Math.min(records.length-2,Math.floor(scaled));
- const fraction=progress>=1?1:scaled-index;
-
- const a=records[index];
- const b=records[index+1];
+ const scaled=Math.max(0,Math.min(1,p))*(r.length-1);
+ const i=Math.min(r.length-2,Math.floor(scaled));
+ const f=p>=1?1:scaled-i;
+ const a=r[i],b=r[i+1];
 
  return {
-  lat:a.y+(b.y-a.y)*fraction,
-  lng:a.x+(b.x-a.x)*fraction,
-  index:progress>=1?records.length-1:index,
-  record:fraction>=1?b:a
+  lat:a.y+(b.y-a.y)*f,
+  lng:a.x+(b.x-a.x)*f,
+  index:p>=1?r.length-1:i,
+  record:f>=1?b:a
  };
 }
 
-function updateMovingMarkers(progress){
+function updateMovingMarkers(p){
  let primary=null;
 
- tracks.forEach(track=>{
-  if(!track.marker) return;
-
-  const result=interpolateTrack(track,progress);
-
-  track.marker.setLatLng([result.lat,result.lng]);
-
-  if(!primary) primary={track,result};
+ tracks.forEach(t=>{
+  if(!t.marker)return;
+  const r=interpolate(t,p);
+  t.marker.setLatLng([r.lat,r.lng]);
+  if(!primary)primary={track:t,result:r};
  });
 
  if(primary){
-  const track=primary.track;
-  const result=primary.result;
-  const record=result.record;
+  const t=primary.track,r=primary.result,c=r.record;
+  $("current-enumerator").textContent=t.interviewer;
+  $("current-compound").textContent=c.compoundNo||r.index+1;
+  $("current-time").textContent=fmtDateTime(c.created);
+  $("current-progress").textContent=Math.round(p*100)+"%";
 
-  $("current-enumerator").textContent=track.interviewer;
-  $("current-compound").textContent=record.compoundNo||result.index+1;
-  $("current-time").textContent=formatDateTime(record.created);
-  $("current-progress").textContent=Math.round(progress*100)+"%";
-
-  const total=track.records.length;
-  const current=Math.min(
-   total,
-   Math.floor(progress*(total-1))+1
-  );
-
+  const total=t.records.length;
+  const current=Math.min(total,Math.floor(p*(total-1))+1);
   $("timeline-current").textContent=current+" / "+total;
  }
 
- $("progress").style.width=(progress*100)+"%";
- $("timeline").value=Math.round(progress*1000);
+ $("progress").style.width=(p*100)+"%";
+ $("timeline").value=Math.round(p*1000);
 }
 
 function animationLoop(timestamp){
- if(!animationRunning) return;
-
- if(lastFrameTime===null) lastFrameTime=timestamp;
+ if(!animationRunning)return;
+ if(lastFrameTime===null)lastFrameTime=timestamp;
 
  const delta=Math.min(100,timestamp-lastFrameTime);
  lastFrameTime=timestamp;
 
- const speed=Number($("speed").value)||1;
- const duration=getPlaybackDuration();
-
- animationProgress+=(delta*speed)/duration;
+ animationProgress+=(delta*(Number($("speed").value)||1))/duration();
 
  if(animationProgress>=1){
   animationProgress=1;
@@ -1357,34 +1046,28 @@ function animationLoop(timestamp){
 
 function playAnimation(){
  if(!tracks.length){
-  showMapMessage("No valid GPS movement sequence available.");
+  mapMessage("No valid GPS movement sequence available.");
   return;
  }
-
  if(tracks.every(t=>t.records.length===1)){
-  showMapMessage("Only one GPS point exists per sequence. No movement segment is available.");
+  mapMessage("Only one GPS point per sequence. No movement segment is available.");
   return;
  }
-
- if(animationProgress>=1) animationProgress=0;
- if(animationRunning) return;
+ if(animationProgress>=1)animationProgress=0;
+ if(animationRunning)return;
 
  animationRunning=true;
  lastFrameTime=null;
-
- $("movement-status").textContent="Enumerator movement animation is running.";
-
+ $("movement-status").textContent="Enumerator movement animation running.";
  animationFrame=requestAnimationFrame(animationLoop);
 }
 
 function stopAnimation(){
  animationRunning=false;
-
  if(animationFrame!==null){
   cancelAnimationFrame(animationFrame);
   animationFrame=null;
  }
-
  lastFrameTime=null;
 }
 
@@ -1403,17 +1086,14 @@ function restartAnimation(){
 function resetTimeline(){
  stopAnimation();
  animationProgress=0;
-
  $("timeline").value=0;
  $("progress").style.width="0%";
 
  if(tracks.length){
-  const allRecords=tracks.flatMap(t=>t.records);
-  const times=allRecords.map(r=>r.created).filter(Boolean).sort((a,b)=>a-b);
-
-  $("timeline-start").textContent=times.length?formatDate(times[0]):"Start";
-  $("timeline-end").textContent=times.length?formatDate(times[times.length-1]):"End";
-
+  const all=tracks.flatMap(t=>t.records);
+  const times=all.map(r=>r.created).filter(Boolean).sort((a,b)=>a-b);
+  $("timeline-start").textContent=times.length?fmtDate(times[0]):"Start";
+  $("timeline-end").textContent=times.length?fmtDate(times[times.length-1]):"End";
   updateMovingMarkers(0);
  }else{
   $("timeline-start").textContent="Start";
@@ -1431,12 +1111,9 @@ $("pause").addEventListener("click",pauseAnimation);
 $("restart").addEventListener("click",restartAnimation);
 
 $("next").addEventListener("click",()=>{
- if(!tracks.length) return;
-
+ if(!tracks.length)return;
  pauseAnimation();
-
  const steps=Math.max(1,...tracks.map(t=>t.records.length-1));
-
  animationProgress=Math.min(1,animationProgress+1/steps);
  updateMovingMarkers(animationProgress);
 });
@@ -1447,60 +1124,45 @@ $("timeline").addEventListener("input",e=>{
  updateMovingMarkers(animationProgress);
 });
 
-$("speed").addEventListener("change",()=>{
- if(animationRunning){
-  stopAnimation();
-  playAnimation();
- }
-});
-
-/* ============================================================
-   16. ANALYTICS
-============================================================ */
+/* =========================================================
+   17. ANALYTICS
+========================================================= */
 
 function updateAnalytics(){
  const gps=filtered.filter(c=>c.hasGPS);
- const enumerators=uniqueValues(filtered,"interviewer");
- const teams=uniqueValues(filtered,"team");
+ const enumerators=unique(filtered,"interviewer");
+ const teams=unique(filtered,"team");
 
- let linkedHouseholds=0;
- let members=0;
-
+ let linked=0,members=0;
  filtered.forEach(c=>{
-  const linked=householdLookup.get(c.globalID)||[];
-
-  linkedHouseholds+=linked.length;
-  linked.forEach(h=>members+=h.members||0);
+  const hh=householdLookup.get(c.globalID)||[];
+  linked+=hh.length;
+  hh.forEach(h=>members+=h.members||0);
  });
 
  const uniqueCompounds=new Set(
   filtered.map(c=>c.globalID||c.compoundNo||c._index)
  ).size;
 
- $("kpi-compounds").textContent=numberFormat(filtered.length);
- $("kpi-households").textContent=numberFormat(linkedHouseholds);
- $("kpi-enumerators").textContent=numberFormat(enumerators.length);
- $("kpi-teams").textContent=numberFormat(teams.length);
- $("kpi-members").textContent=numberFormat(members);
-
+ $("kpi-compounds").textContent=fmt(filtered.length);
+ $("kpi-households").textContent=fmt(linked);
+ $("kpi-enumerators").textContent=fmt(enumerators.length);
+ $("kpi-teams").textContent=fmt(teams.length);
+ $("kpi-members").textContent=fmt(members);
  $("kpi-gps").textContent=filtered.length
-  ?Math.round(gps.length/filtered.length*100)+"%"
-  :"0%";
+  ?Math.round(gps.length/filtered.length*100)+"%":"0%";
 
  $("stat-lga").textContent=$("lga-filter").value||"All";
  $("stat-interviewer").textContent=$("interviewer-filter").value||"All";
  $("stat-date").textContent=$("date-filter").value||"All";
- $("stat-valid").textContent=numberFormat(gps.length);
- $("stat-unique").textContent=numberFormat(uniqueCompounds);
-
- $("stat-average").textContent=filtered.length
-  ?(linkedHouseholds/filtered.length).toFixed(2)
-  :"0";
+ $("stat-valid").textContent=fmt(gps.length);
+ $("stat-unique").textContent=fmt(uniqueCompounds);
+ $("stat-average").textContent=filtered.length?(linked/filtered.length).toFixed(2):"0";
 }
 
-/* ============================================================
-   17. VISIT SEQUENCE
-============================================================ */
+/* =========================================================
+   18. VISIT SEQUENCE
+========================================================= */
 
 function updateVisitList(){
  const container=$("visit-list");
@@ -1509,29 +1171,23 @@ function updateVisitList(){
  const records=filtered.filter(c=>c.hasGPS).slice(0,250);
 
  if(!records.length){
-  container.innerHTML='<div class="hint">No valid GPS compound records available.</div>';
+  container.innerHTML='<div class="hint">No valid GPS compound records.</div>';
   return;
  }
 
- records.forEach((c,index)=>{
+ records.forEach((c,i)=>{
   const div=document.createElement("div");
   div.className="record";
-
   div.innerHTML=`
-   <strong>${index+1}. Compound ${escapeHTML(c.compoundNo||"—")}</strong><br>
-   ${escapeHTML(c.interviewer)} • ${escapeHTML(c.date)}<br>
-   ${escapeHTML(formatDateTime(c.created))}<br>
-   <span style="color:#64748b">${c.y.toFixed(5)}, ${c.x.toFixed(5)}</span>
-  `;
-
-  div.style.cursor="pointer";
+   <strong>${i+1}. Compound ${esc(c.compoundNo||"—")}</strong><br>
+   ${esc(c.interviewer)} • ${esc(c.date)}<br>
+   ${esc(fmtDateTime(c.created))}<br>
+   <span style="color:#64748b">${c.y}, ${c.x}</span>`;
 
   div.addEventListener("click",()=>{
    map.setView([c.y,c.x],17);
-
    pointLayer.eachLayer(layer=>{
     const ll=layer.getLatLng&&layer.getLatLng();
-
     if(ll&&Math.abs(ll.lat-c.y)<0.000001&&Math.abs(ll.lng-c.x)<0.000001){
      layer.openPopup();
     }
@@ -1549,9 +1205,9 @@ function updateVisitList(){
  }
 }
 
-/* ============================================================
-   18. MAP DISPLAY CONTROLS
-============================================================ */
+/* =========================================================
+   19. MAP DISPLAY CONTROLS
+========================================================= */
 
 ["show-points","show-track","show-labels"].forEach(id=>{
  $(id).addEventListener("change",()=>{
@@ -1561,47 +1217,39 @@ function updateVisitList(){
 });
 
 $("show-ea").addEventListener("change",()=>{
- if(!eaLayer) return;
-
- if($("show-ea").checked){
-  eaLayer.addTo(map);
- }else{
-  map.removeLayer(eaLayer);
- }
+ if(!eaLayer)return;
+ if($("show-ea").checked)eaLayer.addTo(map);
+ else map.removeLayer(eaLayer);
 });
 
 $("fit-map").addEventListener("change",()=>{
- if($("fit-map").checked) fitFilteredMap();
+ if($("fit-map").checked)fitFilteredMap();
 });
 
-/* ============================================================
-   19. EXPORT CSV
-============================================================ */
+/* =========================================================
+   20. EXPORT FUNCTIONS
+========================================================= */
 
 function downloadFile(content,filename,type){
  const blob=new Blob([content],{type});
  const url=URL.createObjectURL(blob);
-
  const a=document.createElement("a");
  a.href=url;
  a.download=filename;
-
  document.body.appendChild(a);
  a.click();
  a.remove();
-
  URL.revokeObjectURL(url);
 }
 
 $("export-csv").addEventListener("click",()=>{
  if(!filtered.length){
-  showMapMessage("No filtered records to export.");
+  mapMessage("No filtered records to export.");
   return;
  }
 
  const csv=Papa.unparse(filtered.map(c=>{
   const linked=householdLookup.get(c.globalID)||[];
-
   return {
    Compound_Number:c.compoundNo,
    Enumerator:c.interviewer,
@@ -1621,40 +1269,32 @@ $("export-csv").addEventListener("click",()=>{
   };
  }));
 
- downloadFile(
-  csv,
-  "GLFS_Filtered_Compound_Records.csv",
-  "text/csv;charset=utf-8"
- );
+ downloadFile(csv,"GLFS_Filtered_Compound_Records.csv","text/csv;charset=utf-8");
 });
-
-/* ============================================================
-   20. EXPORT MOVEMENT GEOJSON
-============================================================ */
 
 $("export-track").addEventListener("click",()=>{
  const features=[];
 
- tracks.forEach(track=>{
-  if(!track.records.length) return;
+ tracks.forEach(t=>{
+  if(!t.records.length)return;
 
   features.push({
    type:"Feature",
    properties:{
-    enumerator:track.interviewer,
-    date:track.date,
-    point_count:track.records.length,
-    description:"Straight-line connection between recorded compound GPS locations. Not a continuous GPS trajectory."
+    enumerator:t.interviewer,
+    date:t.date,
+    point_count:t.records.length,
+    description:"Straight-line links between recorded GPS points; not continuous GPS tracking."
    },
    geometry:{
-    type:track.records.length>1?"LineString":"Point",
-    coordinates:track.records.length>1
-     ?track.records.map(c=>[c.x,c.y])
-     :[track.records[0].x,track.records[0].y]
+    type:t.records.length>1?"LineString":"Point",
+    coordinates:t.records.length>1
+     ?t.records.map(c=>[c.x,c.y])
+     :[t.records[0].x,t.records[0].y]
    }
   });
 
-  track.records.forEach((c,i)=>{
+  t.records.forEach((c,i)=>{
    features.push({
     type:"Feature",
     properties:{
@@ -1671,38 +1311,28 @@ $("export-track").addEventListener("click",()=>{
      enumeration_area:c.ea,
      global_id:c.globalID
     },
-    geometry:{
-     type:"Point",
-     coordinates:[c.x,c.y]
-    }
+    geometry:{type:"Point",coordinates:[c.x,c.y]}
    });
   });
  });
 
  downloadFile(
-  JSON.stringify({
-   type:"FeatureCollection",
-   name:"GLFS_Enumerator_Movement",
-   features
-  },null,2),
+  JSON.stringify({type:"FeatureCollection",name:"GLFS_Enumerator_Movement",features},null,2),
   "GLFS_Enumerator_Movement.geojson",
   "application/geo+json"
  );
 });
 
-/* ============================================================
-   21. INITIALIZATION
-============================================================ */
+/* =========================================================
+   21. STARTUP
+========================================================= */
 
-map.whenReady(()=>{
- setTimeout(()=>map.invalidateSize(),250);
-});
+map.whenReady(()=>setTimeout(()=>map.invalidateSize(),250));
 
 updateAnalytics();
 
-// Automatically download all three files when the dashboard opens.
+// Automatically loads the available GitHub files on page opening.
 loadAllGitHubFiles();
-
 </script>
 </body>
 </html>
