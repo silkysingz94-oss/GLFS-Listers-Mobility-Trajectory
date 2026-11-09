@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SILKYSINGZ GEOAI | GLFS LISTERS EMUMERATORS MOVEMENT INTELLIGENCE</title>
+<title>SILKYSINGZ GEOAI | GLFS LISTERS OR ENUMERATORS' MOVEMENT TRACKING</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -13,11 +13,8 @@
 
 <style>
 :root{
- --green:#14532d;
- --dark:#102b24;
- --light:#edf3ee;
- --border:#dce5df;
- --muted:#64748b;
+ --green:#14532d;--dark:#102b24;--light:#edf3ee;
+ --border:#dce5df;--muted:#64748b;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:Arial,sans-serif;color:#172b24}
@@ -32,15 +29,15 @@ header{
 }
 .brand{display:flex;align-items:center;gap:12px}
 .brand-icon{
- width:40px;height:40px;border-radius:9px;
- background:#1d7044;display:grid;place-items:center;font-size:19px
+ width:40px;height:40px;border-radius:9px;background: #1d7044;
+ display:grid;place-items:center;font-size:19px
 }
 .brand h1{font-size:15px;margin:0 0 4px}
 .brand p{font-size:10px;margin:0;color:#c7d9ce}
 .header-status{text-align:right;font-size:10px;color:#d5e7dc}
 main{
- min-height:0;flex:1;
- display:grid;grid-template-columns:295px minmax(300px,1fr) 285px;
+ min-height:0;flex:1;display:grid;
+ grid-template-columns:295px minmax(300px,1fr) 285px;
  gap:9px;padding:9px
 }
 .panel{
@@ -66,7 +63,6 @@ input[type=range]{width:100%;accent-color:var(--green)}
 }
 .btn-primary{background:#166534;color:white}
 .btn-orange{background:#ea580c;color:white}
-.btn-blue{background:#2563eb;color:white}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .full{width:100%}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap}
@@ -119,10 +115,7 @@ input[type=range]{width:100%;accent-color:var(--green)}
 .playback-grid .btn{padding:9px 3px}
 .playback-grid .btn i{font-size:13px;margin-bottom:5px}
 .progress-wrap{height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:7px 0}
-#progress{
- height:100%;width:0;background:#16a34a;
- transition:width .04s linear
-}
+#progress{height:100%;width:0;background:#16a34a;transition:width .04s linear}
 .timeline-labels{display:flex;justify-content:space-between;font-size:9px;color:#64748b}
 .record-list{max-height:240px;overflow:auto}
 .record{
@@ -141,6 +134,11 @@ footer{
  border-radius:6px;padding:8px;font-size:10px;
  color:#166534;line-height:1.5;margin-top:9px
 }
+.route-status{
+ background:#eff6ff;border:1px solid #bfdbfe;
+ color:#1e40af;border-radius:6px;padding:8px;
+ font-size:10px;line-height:1.5;margin-top:8px
+}
 @media(max-width:1050px){
  main{grid-template-columns:260px minmax(260px,1fr)}
  #right-panel{display:none}
@@ -157,13 +155,12 @@ footer{
 
 <body>
 <div id="app">
-
 <header>
  <div class="brand">
   <div class="brand-icon"><i class="fa-solid fa-route"></i></div>
   <div>
-   <h1>SILKYSINGZ GEOAI | GLFS LISTERS EMUMERATORS MOVEMENT INTELLIGENCE</h1>
-   <p>Compound visits • Household linkage • Enumerator GPS trajectory • Fieldwork monitoring</p>
+   <h1>SILKYSINGZ GEOAI | GLFS LISTERS OR ENUMERATORS' MOVEMENT TRACKING</h1>
+   <p>OpenStreetMap pedestrian routing • Compound visits • Household linkage • GPS trajectory</p>
   </div>
  </div>
  <div class="header-status">
@@ -173,23 +170,20 @@ footer{
 </header>
 
 <main>
-
-<!-- LEFT CONTROLS -->
 <aside class="panel">
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-database"></i> GitHub datasets</h3>
-
   <div class="small-stat"><span>Compound CSV</span><strong id="compound-source-state">Waiting</strong></div>
   <div class="small-stat"><span>Household CSV</span><strong id="household-source-state">Waiting</strong></div>
   <div class="small-stat"><span>EA boundary JSON</span><strong id="ea-source-state">Waiting</strong></div>
+  <div class="small-stat"><span>OSM routing service</span><strong id="road-source-state">Waiting</strong></div>
 
-  <p class="hint">The household CSV is optional. Compound records and EA boundaries can load independently.</p>
+  <p class="hint">Routes are requested from OpenStreetMap-based pedestrian routing. No local road GeoJSON is required.</p>
 
   <button class="btn btn-primary full" id="refresh-github">
    <i class="fa-solid fa-rotate"></i> Update GitHub datasets
   </button>
-
   <div id="data-status" class="status" style="margin-top:8px">Connecting...</div>
   <div class="hint">Last update: <span id="last-update">Not yet loaded</span></div>
 
@@ -226,12 +220,20 @@ footer{
   </div>
  </section>
 
- <!-- ANIMATION CONTROLS -->
  <section class="panel-section">
-  <h3 class="section-title"><i class="fa-solid fa-film"></i> Enumerator movement animation</h3>
+  <h3 class="section-title"><i class="fa-solid fa-film"></i> OSM route animation</h3>
 
   <div class="field">
-   <label>Playback speed</label>
+   <label>Assumed walking speed</label>
+   <select id="travel-speed">
+    <option value="3">Slow walking — 3 km/h</option>
+    <option value="4" selected>Normal walking — 4 km/h</option>
+    <option value="5">Fast walking — 5 km/h</option>
+   </select>
+  </div>
+
+  <div class="field">
+   <label>Animation playback speed</label>
    <select id="speed">
     <option value="0.25">0.25× Very slow</option>
     <option value="0.5">0.5× Slow</option>
@@ -261,7 +263,11 @@ footer{
   </div>
 
   <div class="animation-status" id="movement-status">
-   Waiting for GPS records. Load the compound CSV and apply filters.
+   Waiting for GPS records and OSM routes.
+  </div>
+
+  <div class="route-status" id="route-status">
+   OSM routing is waiting for GPS records.
   </div>
 
   <div style="margin-top:11px">
@@ -273,9 +279,8 @@ footer{
    <div class="progress-wrap"><div id="progress"></div></div>
    <input type="range" id="timeline" min="0" max="1000" value="0">
   </div>
-
   <div class="hint">
-   The animation replays the chronological sequence of recorded compound GPS points. The path is interpolated between observations; it is not continuous GPS tracking.
+   Each consecutive GPS visit is routed using an OSM pedestrian profile. The marker follows the returned route geometry. Estimated time is calculated using the selected assumed walking speed.
   </div>
  </section>
 
@@ -292,7 +297,7 @@ footer{
   </div>
   <div class="field">
    <label><input type="checkbox" id="show-points" checked> Show compound points</label>
-   <label><input type="checkbox" id="show-track" checked> Show movement paths</label>
+   <label><input type="checkbox" id="show-track" checked> Show OSM movement routes</label>
    <label><input type="checkbox" id="show-ea" checked> Show EA boundaries</label>
    <label><input type="checkbox" id="show-labels"> Show point numbers</label>
    <label><input type="checkbox" id="fit-map" checked> Zoom to filtered records</label>
@@ -303,35 +308,27 @@ footer{
   <h3 class="section-title"><i class="fa-solid fa-download"></i> Export data</h3>
   <div class="btn-row">
    <button class="btn btn-primary" id="export-csv">Export filtered CSV</button>
-   <button class="btn" id="export-track">Export movement GeoJSON</button>
+   <button class="btn" id="export-track">Export routed GeoJSON</button>
   </div>
  </section>
-
 </aside>
 
-<!-- MAP -->
 <div id="map-wrap">
  <div id="map"></div>
-
  <div class="map-tools">
   <div class="map-chip"><i class="fa-solid fa-location-dot" style="color:#2563eb"></i> Recorded compounds</div>
-  <div class="map-chip"><i class="fa-solid fa-person-walking" style="color:#ea580c"></i> Animated enumerator</div>
+  <div class="map-chip"><i class="fa-solid fa-person-walking" style="color:#ea580c"></i> OSM pedestrian route</div>
  </div>
-
  <div id="map-message"></div>
-
  <div class="map-legend">
   <div><span class="dot" style="background:#2563eb"></span>Compound GPS point</div>
   <div><span class="dot" style="background:#ea580c"></span>Moving enumerator</div>
-  <div><span class="line" style="background:#ea580c"></span>Recorded path</div>
+  <div><span class="line" style="background:#ea580c"></span>OSM route geometry</div>
   <div><span class="line" style="background:#16a34a"></span>EA boundary</div>
-  <div><span class="line" style="background:#f97316"></span>Animated trail</div>
  </div>
 </div>
 
-<!-- RIGHT ANALYTICS -->
 <aside class="panel" id="right-panel">
-
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-chart-column"></i> Activity summary</h3>
   <div class="kpi-grid">
@@ -342,6 +339,16 @@ footer{
    <div class="kpi"><div class="value" id="kpi-members">0</div><div class="name">Household members</div></div>
    <div class="kpi"><div class="value" id="kpi-gps">0%</div><div class="name">GPS availability</div></div>
   </div>
+ </section>
+
+ <section class="panel-section">
+  <h3 class="section-title"><i class="fa-solid fa-route"></i> OSM journey estimates</h3>
+  <div class="small-stat"><span>Routed distance</span><strong id="stat-distance">0 km</strong></div>
+  <div class="small-stat"><span>Estimated travel time</span><strong id="stat-travel-time">0 min</strong></div>
+  <div class="small-stat"><span>Successfully routed legs</span><strong id="stat-routed-legs">0</strong></div>
+  <div class="small-stat"><span>Unrouted legs</span><strong id="stat-unrouted-legs">0</strong></div>
+  <div class="small-stat"><span>Assumed speed</span><strong id="stat-speed">4 km/h</strong></div>
+  <div class="small-stat"><span>Routing provider</span><strong>OSM / OSRM</strong></div>
  </section>
 
  <section class="panel-section">
@@ -362,31 +369,34 @@ footer{
   <div class="small-stat"><span>Compound</span><strong id="current-compound">—</strong></div>
   <div class="small-stat"><span>Recorded time</span><strong id="current-time">—</strong></div>
   <div class="small-stat"><span>Visit sequence</span><strong id="current-sequence">—</strong></div>
+  <div class="small-stat"><span>Current journey distance</span><strong id="current-distance">—</strong></div>
+  <div class="small-stat"><span>Estimated journey time</span><strong id="current-eta">—</strong></div>
   <div class="small-stat"><span>Playback progress</span><strong id="current-progress">0%</strong></div>
  </section>
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-list"></i> Compound visit sequence</h3>
-  <div id="visit-list" class="record-list">
-   <div class="hint">Waiting for records.</div>
-  </div>
+  <div id="visit-list" class="record-list"><div class="hint">Waiting for records.</div></div>
  </section>
 
  <section class="panel-section">
   <h3 class="section-title"><i class="fa-solid fa-circle-info"></i> Methodology</h3>
   <div class="hint">
-   <b>Compound data:</b> GPS records are read from the compound CSV. x is longitude and y is latitude.
+   <b>Routing source:</b> OpenStreetMap-based pedestrian routing service using an OSRM-compatible route API.
    <br><br>
-   <b>Movement sequence:</b> Records are ordered by CreationDate and grouped by enumerator and date.
+   <b>Route calculation:</b> Consecutive compound GPS coordinates are sent to the pedestrian-routing service. The returned route geometry is used for map display and animation.
    <br><br>
-   <b>Animation:</b> The moving marker is interpolated between successive recorded GPS observations. The orange trail is progressively drawn as the animation advances.
+   <b>Animation:</b> The moving marker advances along the returned OSM route geometry, not a straight line between recorded compound coordinates.
+   <br><br>
+   <b>Travel-time estimate:</b> Returned route distance is divided by the selected assumed walking speed. This is an indicative estimate, not measured travel time.
+   <br><br>
+   <b>Unrouted journeys:</b> If the routing service cannot find a route, or a request fails, that leg is marked as unrouted. No straight-line route is substituted.
    <br><br>
    <b>Household linkage:</b> Household ParentGlobalID is matched with compound GlobalID.
    <br><br>
-   <b>Limitation:</b> The animation does not represent continuous GPS tracking, measured travel speed, or actual road routing.
+   <b>Data attribution:</b> © OpenStreetMap contributors. Routing service availability and coverage are subject to the provider's terms and limits.
   </div>
  </section>
-
 </aside>
 </main>
 
@@ -398,25 +408,26 @@ footer{
 
 <script>
 /* =========================================================
-   1. DATA SOURCE URLS
+  1. DATA SOURCES AND ROUTING CONFIGURATION
 ========================================================= */
 
-const EA_JSON_URL=
-"https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/Census_EAs_Geo.json";
+const EA_JSON_URL="https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/Census_EAs_Geo.json";
+const COMPOUND_CSV_URL="https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/GLFS_27ph1_071126_EXCEL.csv";
+const HOUSEHOLD_CSV_URL="https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/GLFS_27hh1_071126_EXCEL.csv";
+const REPO_API="https://api.github.com/repos/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/contents/";
 
-const COMPOUND_CSV_URL=
-"https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/GLFS_27ph1_071126_EXCEL.csv";
-
-const HOUSEHOLD_CSV_URL=
-"https://raw.githubusercontent.com/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/main/GLFS_27hh1_071126_EXCEL.csv";
-
-const REPO_API=
-"https://api.github.com/repos/silkysingz94-oss/GLFS-Listers-Mobility-Trajectory/contents/";
+/*
+ Public OSM-based pedestrian routing service.
+ The OSRM-compatible URL uses "driving" as its API profile
+ path segment even though this host is the routed-foot service.
+ This is NOT the car-routing endpoint.
+*/
+const OSM_ROUTING_BASE="https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
 
 const DEFAULT_CENTER=[13.45,-15.45];
 
 /* =========================================================
-   2. GLOBAL DATA
+  2. GLOBAL VARIABLES
 ========================================================= */
 
 let compoundRaw=[],householdRaw=[];
@@ -429,45 +440,35 @@ let animationRunning=false;
 let animationFrame=null;
 let lastFrameTime=null;
 let animationProgress=0;
-let animationDuration=10000;
 let activeVisitIndex=0;
 let currentAnimationRecord=null;
-let animatedTrails=[];
-let movingMarkers=[];
 let refreshInProgress=false;
+let routeBuildToken=0;
+let routeCache=new Map();
+let animationEvents=[];
 
 function $(id){return document.getElementById(id)}
 
 /* =========================================================
-   3. MAP
+  3. MAP AND BASEMAPS
 ========================================================= */
 
-const map=L.map("map",{zoomControl:true,preferCanvas:true})
- .setView(DEFAULT_CENTER,8);
+const map=L.map("map",{zoomControl:true,preferCanvas:true}).setView(DEFAULT_CENTER,8);
 
 const baseLayers={
- street:L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom:19,attribution:"© OpenStreetMap"}
- ),
- satellite:L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:19,attribution:"© Esri"}
- ),
+ street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19,attribution:"© OpenStreetMap contributors"
+ }),
+ satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
+  maxZoom:19,attribution:"© Esri"
+ }),
  hybrid:L.layerGroup([
-  L.tileLayer(
-   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-   {maxZoom:19}
-  ),
-  L.tileLayer(
-   "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-   {maxZoom:19}
-  )
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19}),
+  L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19})
  ]),
- terrain:L.tileLayer(
-  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-  {maxZoom:17,attribution:"© OpenTopoMap"}
- )
+ terrain:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{
+  maxZoom:17,attribution:"© OpenTopoMap"
+ })
 };
 
 baseLayers.street.addTo(map);
@@ -485,12 +486,10 @@ $("basemap").addEventListener("change",e=>{
 });
 
 /* =========================================================
-   4. GENERAL HELPERS
+  4. GENERAL HELPERS
 ========================================================= */
 
-function clean(v){
- return v===null||v===undefined?"":String(v).trim();
-}
+function clean(v){return v===null||v===undefined?"":String(v).trim()}
 
 function firstValue(row,names){
  const keys=Object.keys(row||{});
@@ -510,41 +509,32 @@ function num(v){
 
 function parseDate(v){
  if(!v)return null;
- if(typeof v==="number")return new Date(v);
+ if(typeof v==="number"){
+  if(v>1000000000000)return new Date(v);
+  if(v>1000000000)return new Date(v*1000);
+  if(v>20000&&v<100000)return new Date(Date.UTC(1899,11,30)+v*86400000);
+ }
  const s=String(v).trim();
-
  if(/^\d{13}$/.test(s))return new Date(Number(s));
  if(/^\d{10}$/.test(s))return new Date(Number(s)*1000);
-
- if(/^\d{5}(\.\d+)?$/.test(s)){
-  return new Date(Date.UTC(1899,11,30)+Number(s)*86400000);
- }
-
+ if(/^\d{5}(\.\d+)?$/.test(s))return new Date(Date.UTC(1899,11,30)+Number(s)*86400000);
  const d=new Date(s);
  return Number.isNaN(d.getTime())?null:d;
 }
 
-function fmt(n){
- return Number(n||0).toLocaleString();
-}
-
-function fmtDate(d){
- return d?d.toLocaleDateString():"Unknown";
-}
-
-function fmtDateTime(d){
- return d?d.toLocaleString():"Unknown";
-}
-
-function unique(rows,key){
- return [...new Set(rows.map(r=>clean(r[key])).filter(Boolean))]
-  .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-}
+function fmt(n){return Number(n||0).toLocaleString()}
+function fmtDate(d){return d?d.toLocaleDateString():"Unknown"}
+function fmtDateTime(d){return d?d.toLocaleString():"Unknown"}
 
 function esc(v){
  return String(v??"").replace(/[&<>"']/g,c=>({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
  }[c]));
+}
+
+function unique(rows,key){
+ return [...new Set(rows.map(r=>clean(r[key])).filter(Boolean))]
+  .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
 
 function setStatus(message,type=""){
@@ -557,21 +547,44 @@ function mapMessage(message){
  el.textContent=message;
  el.style.display="block";
  clearTimeout(mapMessage.timer);
- mapMessage.timer=setTimeout(()=>el.style.display="none",3500);
+ mapMessage.timer=setTimeout(()=>el.style.display="none",4500);
 }
 
+function haversine(a,b){
+ const R=6371008.8;
+ const p1=a[1]*Math.PI/180,p2=b[1]*Math.PI/180;
+ const dp=(b[1]-a[1])*Math.PI/180;
+ const dl=(b[0]-a[0])*Math.PI/180;
+ const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+ return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function formatDistance(m){
+ if(!Number.isFinite(m))return "—";
+ return (m/1000).toLocaleString(undefined,{maximumFractionDigits:2})+" km";
+}
+
+function formatDuration(minutes){
+ if(!Number.isFinite(minutes))return "—";
+ const total=Math.round(minutes);
+ const hours=Math.floor(total/60);
+ const mins=total%60;
+ return hours?hours+" h "+mins+" min":mins+" min";
+}
+
+function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+
 /* =========================================================
-   5. NORMALIZE COMPOUND DATA
+  5. COMPOUND AND HOUSEHOLD NORMALIZATION
 ========================================================= */
 
 function normalizeCompound(row,index){
  const x=num(firstValue(row,["x","X","longitude","Longitude","lon"]));
  const y=num(firstValue(row,["y","Y","latitude","Latitude","lat"]));
- const created=parseDate(firstValue(row,["CreationDate","creationdate","CreatedDate"]));
+ const created=parseDate(firstValue(row,["CreationDate","creationdate","CreatedDate","created_at","Created At"]));
 
  return {
-  ...row,
-  _index:index,
+  ...row,_index:index,
   globalID:clean(firstValue(row,["GlobalID","globalid"])),
   x,y,
   hasGPS:x!==null&&y!==null&&x>=-180&&x<=180&&y>=-90&&y<=90,
@@ -584,130 +597,63 @@ function normalizeCompound(row,index){
   ward:clean(firstValue(row,["EDF_wards","Ward","ward","Wards"])),
   settlement:clean(firstValue(row,["EDF_settlement","Settlement","settlement"])),
   ea:clean(firstValue(row,["EDF_enum_areacode","Enumeration Area","EA","feacode","enum_areacode"])),
-  compoundNo:clean(firstValue(row,[
-   "Q1. Compound/Structure Number","Compound Actual Number","Compound Number","Q1"
-  ])),
-  address:clean(firstValue(row,[
-   "Q2. Compound/Structure Physical Address","Physical Address","Address"
-  ]))
+  compoundNo:clean(firstValue(row,["Q1. Compound/Structure Number","Compound Actual Number","Compound Number","Q1"])),
+  address:clean(firstValue(row,["Q2. Compound/Structure Physical Address","Physical Address","Address"]))
  };
 }
 
-/* =========================================================
-   6. NORMALIZE HOUSEHOLD DATA
-========================================================= */
-
 function normalizeHousehold(row,index){
  return {
-  ...row,
-  _index:index,
+  ...row,_index:index,
   globalID:clean(firstValue(row,["GlobalID","globalid"])),
   parentGlobalID:clean(firstValue(row,["ParentGlobalID","parentglobalid"])),
   householdNo:clean(firstValue(row,["Q4. Household Number","Household Number","Q4"])),
   head:clean(firstValue(row,["Q5. Name of Household Head","Name of Household Head","Household Head"])),
-  members:num(firstValue(row,[
-   "Q6. Total Members in The Household","Total Members in The Household"
-  ]))||0,
+  members:num(firstValue(row,["Q6. Total Members in The Household","Total Members in The Household"]))||0,
   phone:clean(firstValue(row,["Q7. Contact Number of Household Head","Contact Number of Household Head"]))
  };
 }
 
+function buildHouseholdLookup(){
+ householdLookup=new Map();
+ households.forEach(h=>{
+  if(!h.parentGlobalID)return;
+  if(!householdLookup.has(h.parentGlobalID))householdLookup.set(h.parentGlobalID,[]);
+  householdLookup.get(h.parentGlobalID).push(h);
+ });
+}
+
 /* =========================================================
-   7. GITHUB FETCH
+  6. GITHUB DATA LOADING
 ========================================================= */
 
 async function fetchText(url){
- const response=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{
-  cache:"no-store"
- });
+ const response=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
  if(!response.ok)throw new Error("HTTP "+response.status);
  return await response.text();
 }
 
 async function fetchCSV(url,name){
  const txt=await fetchText(url);
- const parsed=Papa.parse(txt,{
-  header:true,skipEmptyLines:true,dynamicTyping:false
- });
+ const parsed=Papa.parse(txt,{header:true,skipEmptyLines:true,dynamicTyping:false});
  if(!parsed.data||!parsed.data.length)throw new Error(name+" has no data rows.");
  return parsed.data;
 }
 
-async function fetchJSON(url){
- return JSON.parse(await fetchText(url));
-}
+async function fetchJSON(url){return JSON.parse(await fetchText(url))}
 
 async function discoverHouseholdFile(){
  const response=await fetch(REPO_API+"?t="+Date.now(),{cache:"no-store"});
  if(!response.ok)return null;
-
  const files=await response.json();
- const candidates=files.filter(f=>
-  f.type==="file"&&/\.csv$/i.test(f.name)&&/(household|hh)/i.test(f.name)
- );
-
+ const candidates=files.filter(f=>f.type==="file"&&/\.csv$/i.test(f.name)&&/(household|hh)/i.test(f.name));
  if(!candidates.length)return null;
-
- return candidates.find(f=>
-  f.name.toLowerCase()==="glfs_27hh1_071126_excel.csv"
- )||candidates[0];
+ return candidates.find(f=>f.name.toLowerCase()==="glfs_27hh1_071126_excel.csv")||candidates[0];
 }
-
-/* =========================================================
-   8. HOUSEHOLD LINKAGE
-========================================================= */
-
-function buildHouseholdLookup(){
- householdLookup=new Map();
-
- households.forEach(h=>{
-  if(!h.parentGlobalID)return;
-  if(!householdLookup.has(h.parentGlobalID)){
-   householdLookup.set(h.parentGlobalID,[]);
-  }
-  householdLookup.get(h.parentGlobalID).push(h);
- });
-}
-
-/* =========================================================
-   9. EA BOUNDARIES
-========================================================= */
-
-function addEABoundaries(data){
- if(eaLayer)map.removeLayer(eaLayer);
-
- eaGeoJSON=data;
-
- eaLayer=L.geoJSON(data,{
-  style:{
-   color:"#15803d",weight:1.1,opacity:.85,
-   fillColor:"#22c55e",fillOpacity:.025
-  },
-  onEachFeature:(feature,layer)=>{
-   const p=feature.properties||{};
-   const code=firstValue(p,["feacode","FEACODE","EA_CODE","enum_areacode","ea_code"]);
-   const ward=firstValue(p,["wardname","WARDNAME","ward"]);
-   const district=firstValue(p,["distname","DISTNAME","district"]);
-
-   layer.bindPopup(
-    "<b>Enumeration Area</b><br>EA: "+esc(code||"Not available")+
-    "<br>Ward: "+esc(ward||"Not available")+
-    "<br>District: "+esc(district||"Not available")
-   );
-  }
- });
-
- if($("show-ea").checked)eaLayer.addTo(map);
-}
-
-/* =========================================================
-   10. LOAD ALL THREE FILES
-========================================================= */
 
 async function loadAllGitHubFiles(){
  if(refreshInProgress)return;
  refreshInProgress=true;
-
  $("refresh-github").disabled=true;
  $("refresh-github").innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
 
@@ -716,7 +662,8 @@ async function loadAllGitHubFiles(){
 
  try{
   stopAnimation();
-  setStatus("Loading compound records...");
+  routeBuildToken++;
+  setStatus("Loading GitHub datasets...");
 
   try{
    $("compound-source-state").textContent="Loading...";
@@ -732,32 +679,26 @@ async function loadAllGitHubFiles(){
   try{
    $("household-source-state").textContent="Checking...";
    let data;
-
-   try{
-    data=await fetchCSV(HOUSEHOLD_CSV_URL,"Household CSV");
-   }catch(e){
+   try{data=await fetchCSV(HOUSEHOLD_CSV_URL,"Household CSV")}
+   catch(e){
     const candidate=await discoverHouseholdFile();
     if(!candidate)throw new Error("Household CSV not found in repository.");
     data=await fetchCSV(candidate.download_url,candidate.name);
    }
-
    householdRaw=data;
    households=data.map(normalizeHousehold);
    buildHouseholdLookup();
    householdOK=true;
    $("household-source-state").textContent=fmt(households.length)+" loaded";
   }catch(e){
-   householdRaw=[];
-   households=[];
-   buildHouseholdLookup();
+   householdRaw=[];households=[];buildHouseholdLookup();
    errors.push("Household CSV: "+e.message);
    $("household-source-state").textContent="Not uploaded";
   }
 
   try{
    $("ea-source-state").textContent="Loading...";
-   const data=await fetchJSON(EA_JSON_URL);
-   addEABoundaries(data);
+   addEABoundaries(await fetchJSON(EA_JSON_URL));
    eaOK=true;
    $("ea-source-state").textContent="Loaded";
   }catch(e){
@@ -765,23 +706,20 @@ async function loadAllGitHubFiles(){
    $("ea-source-state").textContent="Unavailable";
   }
 
-  populateFilters();
-  applyFilters();
+  $("road-source-state").textContent="OSM service";
+  $("route-status").textContent="OSM routing service selected. Routes will be requested for the filtered GPS visits.";
 
+  populateFilters();
+  await applyFilters();
   $("last-update").textContent=new Date().toLocaleString();
 
   if(compoundOK||eaOK){
    $("header-state").textContent="GitHub data loaded";
-   if(errors.length){
-    setStatus("Available datasets loaded. "+errors.join(" | "),"warn");
-   }else{
-    setStatus("All three datasets loaded successfully.","ok");
-   }
+   setStatus(errors.length?"Available datasets loaded. "+errors.join(" | "):"GitHub datasets loaded successfully.",""+(errors.length?"warn":"ok"));
   }else{
    $("header-state").textContent="Loading failed";
    setStatus(errors.join(" | "),"error");
   }
-
  }finally{
   refreshInProgress=false;
   $("refresh-github").disabled=false;
@@ -792,7 +730,7 @@ async function loadAllGitHubFiles(){
 $("refresh-github").addEventListener("click",loadAllGitHubFiles);
 
 /* =========================================================
-   11. MANUAL UPLOADS
+  7. MANUAL FILE UPLOADS
 ========================================================= */
 
 function parseUploadedCSV(file,callback){
@@ -804,74 +742,132 @@ function parseUploadedCSV(file,callback){
 }
 
 $("compound-file").addEventListener("change",e=>{
- const file=e.target.files[0];
- if(!file)return;
-
- parseUploadedCSV(file,data=>{
-  stopAnimation();
-  compoundRaw=data;
-  compounds=data.map(normalizeCompound);
-  populateFilters();
-  applyFilters();
+ const file=e.target.files[0];if(!file)return;
+ parseUploadedCSV(file,async data=>{
+  stopAnimation();routeBuildToken++;
+  compoundRaw=data;compounds=data.map(normalizeCompound);
+  populateFilters();await applyFilters();
   $("compound-source-state").textContent="Manual upload";
   setStatus("Manual compound CSV loaded.","ok");
  });
 });
 
 $("household-file").addEventListener("change",e=>{
- const file=e.target.files[0];
- if(!file)return;
-
+ const file=e.target.files[0];if(!file)return;
  parseUploadedCSV(file,data=>{
-  householdRaw=data;
-  households=data.map(normalizeHousehold);
-  buildHouseholdLookup();
-  updateAnalytics();
-  updateVisitList();
-  renderMap();
+  householdRaw=data;households=data.map(normalizeHousehold);
+  buildHouseholdLookup();updateAnalytics();updateVisitList();renderMap();
   $("household-source-state").textContent=fmt(households.length)+" manual records";
   setStatus("Manual household CSV loaded.","ok");
  });
 });
 
 $("ea-file").addEventListener("change",e=>{
- const file=e.target.files[0];
- if(!file)return;
-
+ const file=e.target.files[0];if(!file)return;
  const reader=new FileReader();
  reader.onload=()=>{
   try{
    addEABoundaries(JSON.parse(reader.result));
    $("ea-source-state").textContent="Manual upload";
    setStatus("Manual EA JSON loaded.","ok");
-  }catch(error){
-   setStatus("Invalid EA JSON: "+error.message,"error");
-  }
+  }catch(error){setStatus("Invalid EA JSON: "+error.message,"error")}
  };
  reader.readAsText(file);
 });
 
 /* =========================================================
-   12. FILTERS
+  8. OPENSTREETMAP ROUTING
+========================================================= */
+
+/*
+ Each consecutive GPS pair is routed independently.
+ The response includes:
+ - GeoJSON route coordinates
+ - route distance in metres
+ - routing-provider duration in seconds
+
+ The dashboard uses returned route distance and the selected
+ walking-speed assumption to calculate its displayed ETA.
+
+ Requests are throttled and cached to reduce service load.
+*/
+
+function routeCacheKey(a,b){
+ return [
+  Number(a[0]).toFixed(5),Number(a[1]).toFixed(5),
+  Number(b[0]).toFixed(5),Number(b[1]).toFixed(5)
+ ].join(",");
+}
+
+async function requestOSMRoute(start,end){
+ const key=routeCacheKey(start,end);
+ if(routeCache.has(key))return routeCache.get(key);
+
+ const coordinates=[
+  Number(start[0])+","+Number(start[1]),
+  Number(end[0])+","+Number(end[1])
+ ].join(";");
+
+ const url=OSM_ROUTING_BASE+coordinates+
+  "?overview=full&geometries=geojson&steps=false";
+
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),25000);
+
+ try{
+  const response=await fetch(url,{
+   method:"GET",
+   headers:{"Accept":"application/json"},
+   signal:controller.signal
+  });
+
+  if(!response.ok)throw new Error("OSM routing HTTP "+response.status);
+
+  const data=await response.json();
+
+  if(data.code!=="Ok"||!data.routes||!data.routes.length){
+   throw new Error(data.message||data.code||"No route returned");
+  }
+
+  const route=data.routes[0];
+  const coordinatesOut=route.geometry&&route.geometry.coordinates;
+
+  if(!coordinatesOut||coordinatesOut.length<2){
+   throw new Error("OSM returned no usable route geometry");
+  }
+
+  const result={
+   ok:true,
+   coordinates:coordinatesOut.map(c=>[Number(c[0]),Number(c[1])]),
+   distance:Number(route.distance)||0,
+   providerDuration:Number(route.duration)||0,
+   provider:"OpenStreetMap pedestrian routing"
+  };
+
+  routeCache.set(key,result);
+  return result;
+ }catch(error){
+  const result={ok:false,reason:error.name==="AbortError"?"Routing request timed out":error.message};
+  routeCache.set(key,result);
+  return result;
+ }finally{
+  clearTimeout(timeout);
+ }
+}
+
+/* =========================================================
+  9. FILTERS
 ========================================================= */
 
 function setOptions(id,values,label){
- const select=$(id);
- const old=select.value;
+ const select=$(id),old=select.value;
  select.innerHTML="";
-
  const first=document.createElement("option");
- first.value="";
- first.textContent=label;
- select.appendChild(first);
-
+ first.value="";first.textContent=label;select.appendChild(first);
  values.forEach(value=>{
   const option=document.createElement("option");
-  option.value=value;
-  option.textContent=value;
-  select.appendChild(option);
+  option.value=value;option.textContent=value;select.appendChild(option);
  });
-
  if(values.includes(old))select.value=old;
 }
 
@@ -886,69 +882,66 @@ function populateFilters(){
  setOptions("date-filter",unique(compounds,"date"),"All dates");
 }
 
-function applyFilters(){
+async function applyFilters(){
  stopAnimation();
+ const token=++routeBuildToken;
 
  const f={
-  lga:$("lga-filter").value,
-  district:$("district-filter").value,
-  ward:$("ward-filter").value,
-  settlement:$("settlement-filter").value,
-  ea:$("ea-filter").value,
-  interviewer:$("interviewer-filter").value,
-  team:$("team-filter").value,
-  date:$("date-filter").value
+  lga:$("lga-filter").value,district:$("district-filter").value,
+  ward:$("ward-filter").value,settlement:$("settlement-filter").value,
+  ea:$("ea-filter").value,interviewer:$("interviewer-filter").value,
+  team:$("team-filter").value,date:$("date-filter").value
  };
 
  filtered=compounds.filter(c=>
-  (!f.lga||c.lga===f.lga)&&
-  (!f.district||c.district===f.district)&&
-  (!f.ward||c.ward===f.ward)&&
-  (!f.settlement||c.settlement===f.settlement)&&
-  (!f.ea||c.ea===f.ea)&&
-  (!f.interviewer||c.interviewer===f.interviewer)&&
-  (!f.team||c.team===f.team)&&
-  (!f.date||c.date===f.date)
+  (!f.lga||c.lga===f.lga)&&(!f.district||c.district===f.district)&&
+  (!f.ward||c.ward===f.ward)&&(!f.settlement||c.settlement===f.settlement)&&
+  (!f.ea||c.ea===f.ea)&&(!f.interviewer||c.interviewer===f.interviewer)&&
+  (!f.team||c.team===f.team)&&(!f.date||c.date===f.date)
  );
 
- filtered.sort((a,b)=>
-  (a.created?.getTime()||0)-(b.created?.getTime()||0)
- );
+ filtered.sort((a,b)=>(a.created?.getTime()||0)-(b.created?.getTime()||0));
 
- buildTracks();
+ $("header-records").textContent=fmt(filtered.length);
+ $("header-state").textContent=fmt(filtered.length)+" filtered compound records";
+ $("movement-status").textContent="Preparing movement sequences...";
+ $("route-status").textContent="Requesting OSM routes for filtered GPS observations...";
+
+ renderMap();
+ updateAnalytics();
+
+ await buildTracks(token);
+ if(token!==routeBuildToken)return;
+
  renderMap();
  updateAnalytics();
  updateVisitList();
  resetAnimation();
 
- $("header-records").textContent=fmt(filtered.length);
- $("header-state").textContent=fmt(filtered.length)+" filtered compound records";
+ if($("fit-map").checked)fitFilteredMap();
 
  if(!tracks.length){
-  $("movement-status").textContent="No valid movement sequence. Check GPS coordinates and CreationDate.";
+  $("movement-status").textContent="No movement sequence available. Check GPS coordinates and CreationDate.";
  }else{
   const count=tracks.reduce((s,t)=>s+t.records.length,0);
-  $("movement-status").textContent=
-   tracks.length+" movement sequence(s) ready, containing "+fmt(count)+" GPS visits. Press PLAY.";
+  $("movement-status").textContent=tracks.length+" movement sequence(s) ready, containing "+fmt(count)+" GPS visits.";
  }
 }
 
 $("apply-filter").addEventListener("click",applyFilters);
 
-$("reset-filter").addEventListener("click",()=>{
- [
-  "lga-filter","district-filter","ward-filter","settlement-filter",
-  "ea-filter","interviewer-filter","team-filter","date-filter"
- ].forEach(id=>$(id).value="");
- applyFilters();
+$("reset-filter").addEventListener("click",async()=>{
+ ["lga-filter","district-filter","ward-filter","settlement-filter","ea-filter","interviewer-filter","team-filter","date-filter"].forEach(id=>$(id).value="");
+ await applyFilters();
 });
 
 /* =========================================================
-   13. BUILD CHRONOLOGICAL TRACKS
+  10. BUILD TRACKS USING OSM ROUTING
 ========================================================= */
 
-function buildTracks(){
+async function buildTracks(token){
  tracks=[];
+ animationEvents=[];
 
  const valid=filtered.filter(c=>c.hasGPS&&c.created);
  const groups=new Map();
@@ -959,53 +952,203 @@ function buildTracks(){
   groups.get(key).push(c);
  });
 
- groups.forEach((records,key)=>{
+ const groupEntries=[...groups.entries()];
+ let completedLegs=0;
+ let totalLegs=groupEntries.reduce((s,[,records])=>s+Math.max(0,records.length-1),0);
+
+ $("route-status").textContent="Preparing "+fmt(totalLegs)+" consecutive visit routes using OSM.";
+
+ for(const [key,records] of groupEntries){
+  if(token!==routeBuildToken)return;
+
   records.sort((a,b)=>a.created.getTime()-b.created.getTime());
 
-  tracks.push({
+  const track={
    key,
    interviewer:records[0].interviewer,
    date:records[0].date,
    records,
-   trail:null,
+   legs:[],
+   routedDistance:0,
+   estimatedMinutes:0,
+   routedLegs:0,
+   unroutedLegs:0,
    marker:null,
-   coordinates:[]
-  });
- });
+   trail:null
+  };
 
- tracks.sort((a,b)=>{
-  const tA=a.records[0].created.getTime();
-  const tB=b.records[0].created.getTime();
-  return tA-tB;
- });
+  for(let i=1;i<records.length;i++){
+   if(token!==routeBuildToken)return;
 
- // One global sequence: all valid GPS records in chronological order.
+   const a=records[i-1],b=records[i];
+   const result=await requestOSMRoute([a.x,a.y],[b.x,b.y]);
+
+   if(token!==routeBuildToken)return;
+
+   if(result.ok){
+    track.legs.push({
+     from:a,to:b,ok:true,
+     distance:result.distance,
+     providerDuration:result.providerDuration,
+     coordinates:result.coordinates,
+     reason:""
+    });
+    track.routedDistance+=result.distance;
+    track.routedLegs++;
+   }else{
+    track.legs.push({
+     from:a,to:b,ok:false,
+     distance:0,
+     providerDuration:0,
+     coordinates:[],
+     reason:result.reason
+    });
+    track.unroutedLegs++;
+   }
+
+   completedLegs++;
+   $("route-status").textContent=
+    "OSM routing progress: "+fmt(completedLegs)+" / "+fmt(totalLegs)+
+    " legs processed. "+fmt(track.routedLegs)+" successful in current sequence.";
+
+   // Brief pause between route requests to reduce pressure on the public service.
+   await sleep(180);
+  }
+
+  const speed=Number($("travel-speed").value)||4;
+  track.estimatedMinutes=(track.routedDistance/1000)/speed*60;
+  tracks.push(track);
+ }
+
+ tracks.sort((a,b)=>a.records[0].created.getTime()-b.records[0].created.getTime());
+
  const all=tracks.flatMap(t=>t.records.map((record,index)=>({
   record,track:t,trackIndex:index
  })));
 
  all.sort((a,b)=>a.record.created.getTime()-b.record.created.getTime());
+ animationEvents=all;
 
  tracks.forEach(t=>{
   t.startIndex=all.findIndex(x=>x.track===t);
-  t.endIndex=all.findLastIndex
-   ?all.findLastIndex(x=>x.track===t)
-   :all.map(x=>x.track).lastIndexOf(t);
+  t.endIndex=all.map(x=>x.track).lastIndexOf(t);
  });
 
- window.animationEvents=all;
+ updateRouteSummary();
 }
 
 /* =========================================================
-   14. MAP MARKERS
+  11. ROUTE GEOMETRY HELPERS
+========================================================= */
+
+function measureCoordinates(coords){
+ const cumulative=[0];
+ let total=0;
+ for(let i=1;i<coords.length;i++){
+  total+=haversine(coords[i-1],coords[i]);
+  cumulative.push(total);
+ }
+ return {cumulative,total};
+}
+
+function interpolateAlongCoordinates(coords,cumulative,distance){
+ if(!coords.length)return null;
+ if(coords.length===1)return coords[0];
+
+ if(distance<=0)return coords[0];
+ const total=cumulative[cumulative.length-1];
+ if(distance>=total)return coords[coords.length-1];
+
+ let i=1;
+ while(i<cumulative.length&&cumulative[i]<distance)i++;
+
+ const segment=cumulative[i]-cumulative[i-1];
+ const fraction=segment>0?(distance-cumulative[i-1])/segment:0;
+
+ return [
+  coords[i-1][0]+(coords[i][0]-coords[i-1][0])*fraction,
+  coords[i-1][1]+(coords[i][1]-coords[i-1][1])*fraction
+ ];
+}
+
+function coordinatesToLatLng(coords){
+ return coords.map(c=>[c[1],c[0]]);
+}
+
+function routeTrailToDistance(coords,cumulative,distance){
+ if(!coords.length)return [];
+ if(coords.length===1)return coords.slice();
+
+ const output=[coords[0]];
+ for(let i=1;i<coords.length;i++){
+  if(cumulative[i]<distance){
+   output.push(coords[i]);
+  }else{
+   const p=interpolateAlongCoordinates(coords,cumulative,distance);
+   if(p)output.push(p);
+   break;
+  }
+ }
+ return output;
+}
+
+/* =========================================================
+  12. ROUTE SUMMARY
+========================================================= */
+
+function updateRouteSummary(){
+ const routed=tracks.reduce((s,t)=>s+t.routedDistance,0);
+ const successful=tracks.reduce((s,t)=>s+t.routedLegs,0);
+ const failed=tracks.reduce((s,t)=>s+t.unroutedLegs,0);
+ const speed=Number($("travel-speed").value)||4;
+ const minutes=(routed/1000)/speed*60;
+
+ $("stat-distance").textContent=formatDistance(routed);
+ $("stat-travel-time").textContent=formatDuration(minutes);
+ $("stat-routed-legs").textContent=fmt(successful);
+ $("stat-unrouted-legs").textContent=fmt(failed);
+ $("stat-speed").textContent=speed+" km/h";
+
+ $("route-status").textContent=
+  "OSM routing completed: "+fmt(successful)+" successful legs; "+
+  fmt(failed)+" unrouted legs. Total OSM route distance: "+
+  formatDistance(routed)+". Estimated walking time: "+
+  formatDuration(minutes)+" at "+speed+" km/h.";
+}
+
+/* =========================================================
+  13. EA BOUNDARIES
+========================================================= */
+
+function addEABoundaries(data){
+ if(eaLayer)map.removeLayer(eaLayer);
+ eaGeoJSON=data;
+
+ eaLayer=L.geoJSON(data,{
+  style:{color:"#15803d",weight:1.1,opacity:.85,fillColor:"#22c55e",fillOpacity:.025},
+  onEachFeature:(feature,layer)=>{
+   const p=feature.properties||{};
+   const code=firstValue(p,["feacode","FEACODE","EA_CODE","enum_areacode","ea_code"]);
+   const ward=firstValue(p,["wardname","WARDNAME","ward"]);
+   const district=firstValue(p,["distname","DISTNAME","district"]);
+   layer.bindPopup("<b>Enumeration Area</b><br>EA: "+esc(code||"Not available")+
+    "<br>Ward: "+esc(ward||"Not available")+"<br>District: "+esc(district||"Not available"));
+  }
+ });
+
+ if($("show-ea").checked)eaLayer.addTo(map);
+}
+
+/* =========================================================
+  14. MAP MARKERS AND POPUPS
 ========================================================= */
 
 function pointIcon(n){
  return L.divIcon({
   className:"",
-  html:$("show-labels").checked
-   ?`<div style="width:21px;height:21px;border-radius:50%;background:#2563eb;color:white;border:2px solid white;display:grid;place-items:center;font-size:9px;font-weight:bold">${n}</div>`
-   :'<div style="width:10px;height:10px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #0008"></div>',
+  html:$("show-labels").checked?
+   `<div style="width:21px;height:21px;border-radius:50%;background:#2563eb;color:white;border:2px solid white;display:grid;place-items:center;font-size:9px;font-weight:bold">${n}</div>`:
+   '<div style="width:10px;height:10px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #0008"></div>',
   iconSize:$("show-labels").checked?[21,21]:[10,10],
   iconAnchor:$("show-labels").checked?[10,10]:[5,5]
  });
@@ -1021,18 +1164,13 @@ function movingIcon(){
 
 function compoundPopup(c){
  const linked=householdLookup.get(c.globalID)||[];
+ const hhHTML=linked.length?linked.map(h=>`
+  <div style="border-top:1px solid #ddd;padding:5px 0">
+   <b>Household ${esc(h.householdNo||"—")}</b><br>
+   Head: ${esc(h.head||"—")}<br>Members: ${fmt(h.members)}
+  </div>`).join(""):"<i>No linked household records.</i>";
 
- const hhHTML=linked.length
-  ?linked.map(h=>`
-   <div style="border-top:1px solid #ddd;padding:5px 0">
-    <b>Household ${esc(h.householdNo||"—")}</b><br>
-    Head: ${esc(h.head||"—")}<br>
-    Members: ${fmt(h.members)}
-   </div>`).join("")
-  :"<i>No linked household records.</i>";
-
- return `
- <div style="min-width:220px;max-width:290px;font-size:11px;line-height:1.55">
+ return `<div style="min-width:220px;max-width:290px;font-size:11px;line-height:1.55">
  <b style="font-size:13px;color:#14532d">Compound visit</b><br>
  <b>Compound:</b> ${esc(c.compoundNo||"—")}<br>
  <b>Enumerator:</b> ${esc(c.interviewer)}<br>
@@ -1044,14 +1182,8 @@ function compoundPopup(c){
  <b>EA:</b> ${esc(c.ea||"—")}<br>
  <b>Recorded:</b> ${esc(fmtDateTime(c.created))}<br>
  <b>GPS:</b> ${c.y}, ${c.x}<hr>
- <b>Linked households: ${linked.length}</b>
- ${hhHTML}
- </div>`;
+ <b>Linked households: ${linked.length}</b>${hhHTML}</div>`;
 }
-
-/* =========================================================
-   15. RENDER MAP AND PREPARE ANIMATION LAYERS
-========================================================= */
 
 function renderMap(){
  pointLayer.clearLayers();
@@ -1059,46 +1191,35 @@ function renderMap(){
  animatedTrailLayer.clearLayers();
  movingLayer.clearLayers();
 
- animatedTrails=[];
- movingMarkers=[];
-
  if($("show-points").checked){
   let n=0;
   filtered.forEach(c=>{
    if(!c.hasGPS)return;
    n++;
-   L.marker([c.y,c.x],{
-    icon:pointIcon(n),
-    title:"Compound "+(c.compoundNo||n)
-   }).bindPopup(compoundPopup(c)).addTo(pointLayer);
+   L.marker([c.y,c.x],{icon:pointIcon(n),title:"Compound "+(c.compoundNo||n)})
+    .bindPopup(compoundPopup(c)).addTo(pointLayer);
   });
  }
 
- // Static paths are faint references; the orange animated trail is separate.
- if($("show-track").checked){
-  tracks.forEach(t=>{
-   if(t.records.length<2)return;
-
-   L.polyline(t.records.map(c=>[c.y,c.x]),{
-    color:"#94a3b8",weight:2,opacity:.38,dashArray:"4,7"
-   }).addTo(staticTrackLayer);
-
-   t.trail=L.polyline([],{
-    color:"#f97316",weight:5,opacity:.95,lineCap:"round"
-   }).addTo(animatedTrailLayer);
-
-   t.marker=L.marker(
-    [t.records[0].y,t.records[0].x],
-    {icon:movingIcon(),zIndexOffset:1500}
-   ).bindPopup(
-    "<b>Enumerator:</b> "+esc(t.interviewer)+
-    "<br><b>Date:</b> "+esc(t.date)
-   ).addTo(movingLayer);
-
-   animatedTrails.push(t);
-   movingMarkers.push(t);
+ tracks.forEach(t=>{
+  t.legs.forEach(leg=>{
+   if(leg.ok&&$("show-track").checked){
+    L.polyline(coordinatesToLatLng(leg.coordinates),{
+     color:"#94a3b8",weight:3,opacity:.7
+    }).addTo(staticTrackLayer);
+   }
   });
- }
+
+  t.trail=L.polyline([],{
+   color:"#f97316",weight:5,opacity:.98,lineCap:"round"
+  }).addTo(animatedTrailLayer);
+
+  const first=t.records[0];
+  t.marker=L.marker([first.y,first.x],{
+   icon:movingIcon(),zIndexOffset:1500
+  }).bindPopup("<b>Enumerator:</b> "+esc(t.interviewer)+"<br><b>Date:</b> "+esc(t.date))
+   .addTo(movingLayer);
+ });
 
  if(eaLayer){
   if($("show-ea").checked&&!map.hasLayer(eaLayer))eaLayer.addTo(map);
@@ -1107,68 +1228,69 @@ function renderMap(){
 }
 
 /* =========================================================
-   16. ANIMATION ENGINE
+  15. ANIMATION POSITION
 ========================================================= */
 
-function getEvents(){
- return window.animationEvents||[];
-}
+function getEvents(){return animationEvents}
 
 function getAnimationDuration(){
  const events=getEvents();
  const segments=Math.max(1,events.length-1);
- const seconds=Number($("interval").value)||2;
- return Math.max(1500,segments*seconds*1000);
+ return Math.max(1500,segments*(Number($("interval").value)||2)*1000);
 }
 
-function interpolateTrack(track,progress){
+function getTrackProgress(track,eventPosition){
+ if(!getEvents().length)return 0;
+ if(track.startIndex===track.endIndex)return eventPosition>=track.startIndex?1:0;
+ if(eventPosition<track.startIndex)return 0;
+ if(eventPosition>=track.endIndex)return 1;
+ return (eventPosition-track.startIndex)/(track.endIndex-track.startIndex);
+}
+
+function getTrackPosition(track,progress){
  const records=track.records;
 
  if(records.length===1){
   return {
-   lat:records[0].y,
-   lng:records[0].x,
-   record:records[0],
-   index:0,
-   coords:[[records[0].y,records[0].x]]
+   coord:[records[0].x,records[0].y],
+   record:records[0],trail:[],distance:0,legIndex:0
   };
  }
 
  const scaled=Math.max(0,Math.min(1,progress))*(records.length-1);
- const i=Math.min(records.length-2,Math.floor(scaled));
- const fraction=progress>=1?1:scaled-i;
+ const legIndex=Math.min(records.length-2,Math.floor(scaled));
+ const fraction=progress>=1?1:scaled-legIndex;
+ const leg=track.legs[legIndex];
 
- const a=records[i];
- const b=records[i+1];
+ if(!leg||!leg.ok){
+  const a=records[legIndex],b=records[legIndex+1];
+  return {
+   coord:fraction<1?[a.x,a.y]:[b.x,b.y],
+   record:fraction<1?a:b,
+   trail:[],
+   distance:0,
+   legIndex,
+   unrouted:true
+  };
+ }
 
- const lat=a.y+(b.y-a.y)*fraction;
- const lng=a.x+(b.x-a.x)*fraction;
-
- const coords=records.slice(0,i+1).map(r=>[r.y,r.x]);
- coords.push([lat,lng]);
+ const measured=measureCoordinates(leg.coordinates);
+ const distance=measured.total*fraction;
+ const coord=interpolateAlongCoordinates(
+  leg.coordinates,measured.cumulative,distance
+ );
+ const trail=routeTrailToDistance(
+  leg.coordinates,measured.cumulative,distance
+ );
 
  return {
-  lat,lng,
-  record:fraction>=1?b:a,
-  index:fraction>=1?i+1:i,
-  coords
+  coord,
+  record:fraction>=1?records[legIndex+1]:records[legIndex],
+  trail,
+  distance:leg.distance*fraction,
+  legIndex,
+  unrouted:false
  };
-}
-
-function getTrackProgress(track,eventPosition){
- const events=getEvents();
- const total=events.length;
-
- if(!total)return 0;
- if(track.startIndex===track.endIndex)return eventPosition>=track.startIndex?1:0;
-
- const start=track.startIndex;
- const end=track.endIndex;
-
- if(eventPosition<start)return 0;
- if(eventPosition>=end)return 1;
-
- return (eventPosition-start)/(end-start);
 }
 
 function updateAnimationAt(progress){
@@ -1185,45 +1307,56 @@ function updateAnimationAt(progress){
 
  tracks.forEach(track=>{
   const localProgress=getTrackProgress(track,eventPosition);
-
   if(!track.marker)return;
 
-  const pos=interpolateTrack(track,localProgress);
+  const pos=getTrackPosition(track,localProgress);
+  track.marker.setLatLng([pos.coord[1],pos.coord[0]]);
 
-  track.marker.setLatLng([pos.lat,pos.lng]);
-
-  if(track.trail&&$("show-track").checked){
-   track.trail.setLatLngs(pos.coords);
+  if($("show-track").checked&&pos.trail&&pos.trail.length>1){
+   track.trail.setLatLngs(coordinatesToLatLng(pos.trail));
+  }else{
+   track.trail.setLatLngs([]);
   }
  });
 
  const c=event.record;
- const linked=householdLookup.get(c.globalID)||[];
+ const currentTrack=event.track;
+ const localIndex=event.trackIndex;
+ const leg=currentTrack.legs[localIndex]||null;
+ const speed=Number($("travel-speed").value)||4;
+
+ let currentDistance=0,currentETA=0;
+ if(leg&&leg.ok){
+  currentDistance=leg.distance/1000;
+  currentETA=(currentDistance/speed)*60;
+ }
 
  $("current-enumerator").textContent=c.interviewer;
  $("current-compound").textContent=c.compoundNo||"Not recorded";
  $("current-time").textContent=fmtDateTime(c.created);
  $("current-sequence").textContent=(nearestIndex+1)+" / "+events.length;
+ $("current-distance").textContent=leg&&leg.ok?formatDistance(leg.distance):"Not routed";
+ $("current-eta").textContent=leg&&leg.ok?formatDuration(currentETA):"Not available";
  $("current-progress").textContent=Math.round(bounded*100)+"%";
 
  $("timeline-current").textContent=(nearestIndex+1)+" / "+events.length;
  $("progress").style.width=(bounded*100)+"%";
  $("timeline").value=Math.round(bounded*1000);
 
+ const routeLabel=leg?(leg.ok?"OSM pedestrian route":"Unrouted leg"):"First visit";
  $("movement-status").textContent=
-  "Replaying visit "+(nearestIndex+1)+" of "+events.length+
-  " • "+c.interviewer+" • "+fmtDateTime(c.created);
+  "Visit "+(nearestIndex+1)+" of "+events.length+
+  " • "+c.interviewer+" • "+routeLabel;
 
  updateVisitHighlight(c);
 }
 
 /* =========================================================
-   17. PLAY / PAUSE / RESTART
+  16. PLAYBACK CONTROLS
 ========================================================= */
 
 function animationLoop(timestamp){
  if(!animationRunning)return;
-
  if(lastFrameTime===null)lastFrameTime=timestamp;
 
  const delta=Math.min(100,timestamp-lastFrameTime);
@@ -1248,47 +1381,29 @@ function animationLoop(timestamp){
 
 function playAnimation(){
  const events=getEvents();
+ if(!events.length){mapMessage("No valid GPS records with timestamps.");return}
+ if(events.length<2){mapMessage("At least two GPS records are needed for movement animation.");return}
 
- if(!events.length){
-  mapMessage("No valid GPS points with a recorded CreationDate.");
-  return;
+ if(!animationRunning){
+  if(animationProgress>=1){animationProgress=0;updateAnimationAt(0)}
+  animationRunning=true;
+  lastFrameTime=null;
+  animationFrame=requestAnimationFrame(animationLoop);
  }
-
- if(events.length<2){
-  mapMessage("At least two GPS records are needed for movement animation.");
-  return;
- }
-
- if(animationRunning)return;
-
- if(animationProgress>=1){
-  animationProgress=0;
-  updateAnimationAt(0);
- }
-
- animationRunning=true;
- lastFrameTime=null;
- $("movement-status").textContent="Starting movement animation...";
- animationFrame=requestAnimationFrame(animationLoop);
 }
 
 function stopAnimation(){
  animationRunning=false;
-
  if(animationFrame!==null){
   cancelAnimationFrame(animationFrame);
   animationFrame=null;
  }
-
  lastFrameTime=null;
 }
 
 function pauseAnimation(){
  stopAnimation();
-
- if(getEvents().length){
-  $("movement-status").textContent="Animation paused. Press PLAY to continue.";
- }
+ if(getEvents().length)$("movement-status").textContent="Animation paused. Press PLAY to continue.";
 }
 
 function restartAnimation(){
@@ -1299,20 +1414,11 @@ function restartAnimation(){
 }
 
 function nextVisit(){
- const events=getEvents();
-
- if(!events.length)return;
-
+ const events=getEvents();if(!events.length)return;
  stopAnimation();
-
  const nextIndex=Math.min(events.length-1,activeVisitIndex+1);
  animationProgress=events.length>1?nextIndex/(events.length-1):0;
-
  updateAnimationAt(animationProgress);
-
- if(nextIndex===events.length-1){
-  $("movement-status").textContent="Last recorded visit reached.";
- }
 }
 
 $("play").addEventListener("click",playAnimation);
@@ -1326,22 +1432,14 @@ $("timeline").addEventListener("input",e=>{
  updateAnimationAt(animationProgress);
 });
 
-$("speed").addEventListener("change",()=>{
- if(animationRunning){
-  // Speed changes are applied immediately by the animation loop.
- }
-});
-
 /* =========================================================
-   18. RESET ANIMATION
+  17. RESET AND VISIT HIGHLIGHT
 ========================================================= */
 
 function resetAnimation(){
  stopAnimation();
-
  animationProgress=0;
  activeVisitIndex=0;
-
  const events=getEvents();
 
  $("timeline").value=0;
@@ -1351,36 +1449,27 @@ function resetAnimation(){
   $("timeline-start").textContent=fmtDate(events[0].record.created);
   $("timeline-end").textContent=fmtDate(events[events.length-1].record.created);
   $("timeline-current").textContent="0 / "+events.length;
-
   $("stat-sequences").textContent=fmt(tracks.length);
   $("stat-animation-points").textContent=fmt(events.length);
-
   updateAnimationAt(0);
  }else{
   $("timeline-start").textContent="Start";
   $("timeline-end").textContent="End";
   $("timeline-current").textContent="0 / 0";
-
   $("current-enumerator").textContent="—";
   $("current-compound").textContent="—";
   $("current-time").textContent="—";
   $("current-sequence").textContent="—";
+  $("current-distance").textContent="—";
+  $("current-eta").textContent="—";
   $("current-progress").textContent="0%";
-
   $("stat-sequences").textContent="0";
   $("stat-animation-points").textContent="0";
  }
 }
 
-/* =========================================================
-   19. HIGHLIGHT CURRENT VISIT
-========================================================= */
-
 function updateVisitHighlight(record){
- document.querySelectorAll(".record").forEach(el=>{
-  el.classList.remove("active");
- });
-
+ document.querySelectorAll(".record").forEach(el=>el.classList.remove("active"));
  const el=document.querySelector('[data-record-index="'+record._index+'"]');
  if(el){
   el.classList.add("active");
@@ -1389,14 +1478,13 @@ function updateVisitHighlight(record){
 }
 
 /* =========================================================
-   20. ANALYTICS
+  18. ANALYTICS
 ========================================================= */
 
 function updateAnalytics(){
  const gps=filtered.filter(c=>c.hasGPS);
  const enumerators=unique(filtered,"interviewer");
  const teams=unique(filtered,"team");
-
  let linked=0,members=0;
 
  filtered.forEach(c=>{
@@ -1405,37 +1493,32 @@ function updateAnalytics(){
   hh.forEach(h=>members+=h.members||0);
  });
 
- const uniqueCompounds=new Set(
-  filtered.map(c=>c.globalID||c.compoundNo||c._index)
- ).size;
+ const uniqueCompounds=new Set(filtered.map(c=>c.globalID||c.compoundNo||c._index)).size;
 
  $("kpi-compounds").textContent=fmt(filtered.length);
  $("kpi-households").textContent=fmt(linked);
  $("kpi-enumerators").textContent=fmt(enumerators.length);
  $("kpi-teams").textContent=fmt(teams.length);
  $("kpi-members").textContent=fmt(members);
-
- $("kpi-gps").textContent=filtered.length
-  ?Math.round(gps.length/filtered.length*100)+"%":"0%";
+ $("kpi-gps").textContent=filtered.length?Math.round(gps.length/filtered.length*100)+"%":"0%";
 
  $("stat-lga").textContent=$("lga-filter").value||"All";
  $("stat-interviewer").textContent=$("interviewer-filter").value||"All";
  $("stat-date").textContent=$("date-filter").value||"All";
  $("stat-valid").textContent=fmt(gps.length);
  $("stat-unique").textContent=fmt(uniqueCompounds);
- $("stat-average").textContent=filtered.length
-  ?(linked/filtered.length).toLocaleString(undefined,{maximumFractionDigits:2})
-  :"0";
+ $("stat-average").textContent=filtered.length?(linked/filtered.length).toLocaleString(undefined,{maximumFractionDigits:2}):"0";
+
+ updateRouteSummary();
 }
 
 /* =========================================================
-   21. VISIT LIST
+  19. VISIT LIST
 ========================================================= */
 
 function updateVisitList(){
  const container=$("visit-list");
  container.innerHTML="";
-
  const events=getEvents();
 
  if(!events.length){
@@ -1446,6 +1529,7 @@ function updateVisitList(){
  events.slice(0,500).forEach((event,i)=>{
   const c=event.record;
   const div=document.createElement("div");
+  const leg=event.track.legs[event.trackIndex];
 
   div.className="record";
   div.dataset.recordIndex=c._index;
@@ -1454,14 +1538,15 @@ function updateVisitList(){
    <strong>${i+1}. Compound ${esc(c.compoundNo||"—")}</strong><br>
    ${esc(c.interviewer)} • ${esc(c.date)}<br>
    ${esc(fmtDateTime(c.created))}<br>
-   <span style="color:#64748b">${c.y}, ${c.x}</span>`;
+   <span style="color:#64748b">${c.y}, ${c.x}</span><br>
+   <span style="color:${leg&&leg.ok?"#166534":"#b45309"}">
+    ${leg&&leg.ok?"OSM route distance: "+formatDistance(leg.distance):"No incoming OSM route"}
+   </span>`;
 
   div.addEventListener("click",()=>{
    stopAnimation();
-
    animationProgress=events.length>1?i/(events.length-1):0;
    updateAnimationAt(animationProgress);
-
    map.setView([c.y,c.x],17);
    mapMessage("Selected visit "+(i+1)+" of "+events.length);
   });
@@ -1472,13 +1557,13 @@ function updateVisitList(){
  if(events.length>500){
   const note=document.createElement("div");
   note.className="hint";
-  note.textContent="Showing the first 500 visit records. All records remain available to the animation.";
+  note.textContent="Showing first 500 visits. All records remain available to animation.";
   container.appendChild(note);
  }
 }
 
 /* =========================================================
-   22. MAP DISPLAY SWITCHES
+  20. MAP SWITCHES AND FITTING
 ========================================================= */
 
 ["show-points","show-track","show-labels"].forEach(id=>{
@@ -1491,7 +1576,6 @@ function updateVisitList(){
 
 $("show-ea").addEventListener("change",()=>{
  if(!eaLayer)return;
-
  if($("show-ea").checked)eaLayer.addTo(map);
  else map.removeLayer(eaLayer);
 });
@@ -1502,28 +1586,30 @@ $("fit-map").addEventListener("change",()=>{
 
 function fitFilteredMap(){
  const coords=filtered.filter(c=>c.hasGPS).map(c=>[c.y,c.x]);
-
  if(coords.length){
   const bounds=L.latLngBounds(coords);
   if(bounds.isValid())map.fitBounds(bounds.pad(.12),{maxZoom:16});
- }else{
-  map.setView(DEFAULT_CENTER,8);
- }
+ }else map.setView(DEFAULT_CENTER,8);
 }
 
 /* =========================================================
-   23. EXPORT FILTERED CSV
+  21. SPEED CHANGE
+========================================================= */
+
+$("travel-speed").addEventListener("change",()=>{
+ updateRouteSummary();
+ updateAnimationAt(animationProgress);
+});
+
+/* =========================================================
+  22. EXPORT FILTERED CSV
 ========================================================= */
 
 $("export-csv").addEventListener("click",()=>{
- if(!filtered.length){
-  mapMessage("No filtered records to export.");
-  return;
- }
+ if(!filtered.length){mapMessage("No filtered records to export.");return}
 
  const csv=Papa.unparse(filtered.map(c=>{
   const linked=householdLookup.get(c.globalID)||[];
-
   return {
    Compound_Number:c.compoundNo,
    Enumerator:c.interviewer,
@@ -1547,28 +1633,51 @@ $("export-csv").addEventListener("click",()=>{
 });
 
 /* =========================================================
-   24. EXPORT MOVEMENT GEOJSON
+  23. EXPORT OSM ROUTES AND COMPOUND VISITS
 ========================================================= */
 
 $("export-track").addEventListener("click",()=>{
  const features=[];
+ const speed=Number($("travel-speed").value)||4;
 
  tracks.forEach(t=>{
-  if(!t.records.length)return;
-
-  features.push({
-   type:"Feature",
-   properties:{
-    enumerator:t.interviewer,
-    date:t.date,
-    point_count:t.records.length,
-    description:"Straight-line connections between recorded GPS observations."
-   },
-   geometry:{
-    type:t.records.length>1?"LineString":"Point",
-    coordinates:t.records.length>1
-     ?t.records.map(c=>[c.x,c.y])
-     :[t.records[0].x,t.records[0].y]
+  t.legs.forEach(leg=>{
+   if(leg.ok){
+    features.push({
+     type:"Feature",
+     properties:{
+      type:"OSM pedestrian route",
+      routing_provider:"OpenStreetMap-based OSRM routing service",
+      routing_profile:"Pedestrian",
+      enumerator:t.interviewer,
+      date:t.date,
+      from_compound:leg.from.compoundNo,
+      to_compound:leg.to.compoundNo,
+      route_distance_m:leg.distance,
+      route_distance_km:leg.distance/1000,
+      provider_duration_seconds:leg.providerDuration,
+      assumed_walking_speed_kmh:speed,
+      estimated_walking_minutes:(leg.distance/1000)/speed*60,
+      estimated_time_method:"Route distance divided by selected assumed walking speed",
+      geometry_source:"OSM routing response"
+     },
+     geometry:{type:"LineString",coordinates:leg.coordinates}
+    });
+   }else{
+    features.push({
+     type:"Feature",
+     properties:{
+      type:"Unrouted journey",
+      routing_provider:"OpenStreetMap-based pedestrian routing service",
+      enumerator:t.interviewer,
+      date:t.date,
+      from_compound:leg.from.compoundNo,
+      to_compound:leg.to.compoundNo,
+      route_status:"No route returned",
+      reason:leg.reason
+     },
+     geometry:null
+    });
    }
   });
 
@@ -1588,50 +1697,38 @@ $("export-track").addEventListener("click",()=>{
      settlement:c.settlement,
      enumeration_area:c.ea,
      global_id:c.globalID
-   },
-   geometry:{
-    type:"Point",
-    coordinates:[c.x,c.y]
-   }
+    },
+    geometry:{type:"Point",coordinates:[c.x,c.y]}
    });
   });
  });
 
- downloadFile(
-  JSON.stringify({
-   type:"FeatureCollection",
-   name:"GLFS_Enumerator_Movement",
-   features
-  },null,2),
-  "GLFS_Enumerator_Movement.geojson",
-  "application/geo+json"
- );
+ downloadFile(JSON.stringify({
+  type:"FeatureCollection",
+  name:"GLFS_OSM_Enumerator_Movement",
+  attribution:"© OpenStreetMap contributors",
+  routing_provider:"OpenStreetMap-based pedestrian routing service",
+  features
+ },null,2),"GLFS_OSM_Routed_Enumerator_Movement.geojson","application/geo+json");
 });
 
 function downloadFile(content,filename,type){
  const blob=new Blob([content],{type});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
- a.href=url;
- a.download=filename;
- document.body.appendChild(a);
- a.click();
- a.remove();
- URL.revokeObjectURL(url);
+ a.href=url;a.download=filename;
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 /* =========================================================
-   25. STARTUP
+  24. STARTUP
 ========================================================= */
 
-map.whenReady(()=>{
- setTimeout(()=>map.invalidateSize(),250);
-});
-
+map.whenReady(()=>setTimeout(()=>map.invalidateSize(),250));
 updateAnalytics();
 loadAllGitHubFiles();
 
 </script>
 </body>
 </html>
-
